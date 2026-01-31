@@ -220,7 +220,7 @@
                     { time: "14:40", end: "15:10", title: "移動：名古屋站 → 住宿", icon: "fa-suitcase" },
                     { time: "15:40", end: "17:30", title: "熱田神宮", icon: "fa-torii-gate", desc: "參拜、散步、商店街小吃", location: "熱田神宮" },
                     { time: "18:00", end: "21:30", title: "蓬萊軒 鰻魚飯", icon: "fa-utensils", desc: "松阪屋店，排隊＋用餐，空檔逛 PARCO", location: "蓬萊軒 松坂屋店" },
-                    { time: "21:30", end: "22:00", title: "返回住宿", icon: "fa-bed", desc: "記得買明天的早餐" }
+                    { time: "21:30", end: "22:00", title: "返回住宿", icon: "fa-bed" }
                 ]
             },
             {
@@ -228,13 +228,14 @@
                 day: "週二",
                 hotel: "牧野東公園旁住宿",
                 events: [
-                    { time: "07:10", end: "07:30", title: "前往早餐店", icon: "fa-walking" },
-                    { time: "08:00", end: "08:45", title: "Tsubame Bread & Milk", icon: "fa-bread-slice", desc: "網美早餐店", location: "Tsubame Bread & Milk" },
+                    { time: "07:10", end: "07:30", title: "前往早餐店/睡覺", icon: "fa-walking" },
+                    { time: "08:00", end: "08:45", title: "Tsubame Bread & Milk", icon: "fa-bread-slice", desc: "名古屋早餐店", location: "Tsubame Bread & Milk" },
                     { time: "09:45", end: "12:30", title: "11PhotoStudio 和服換裝", icon: "fa-user-tie", desc: "換裝後前往犬山城拍照", location: "11PhotoStudio 名古屋" },
                     { time: "12:30", end: "16:00", title: "犬山城 ＆ 城下町", icon: "fa-chess-rook", desc: "三光稻荷神社洗錢 (準備台/澳幣)", location: "犬山城" },
                     { time: "17:30", end: "18:00", title: "歸還和服 → 榮", icon: "fa-subway" },
                     { time: "18:30", end: "19:30", title: "榮商圈晚餐", icon: "fa-utensils", location: "榮商圈" },
-                    { time: "19:30", end: "20:30", title: "MIRAI TOWER 夜景", icon: "fa-tower-observation", desc: "久屋大通散步", location: "中部電力 MIRAI TOWER" }
+                    { time: "19:30", end: "20:30", title: "中部電力塔/綠洲21 夜景", icon: "fa-tower-observation", desc: "久屋大通散步", location: "中部電力 MIRAI TOWER" }
+                    { time: "21:30", end: "22:00", title: "返回住宿", icon: "fa-bed", desc: "記得買明天的早餐" }
                 ]
             },
             {
@@ -247,7 +248,8 @@
                     { time: "13:00", end: "13:40", title: "午餐：味之与平", icon: "fa-utensils", desc: "不用吃太飽，留胃逛老街", location: "味之与平" },
                     { time: "13:50", end: "15:40", title: "飛驒高山老街", icon: "fa-store", location: "飛驒高山老街" },
                     { time: "18:00", end: "18:20", title: "返回名古屋市區", icon: "fa-bus" },
-                    { time: "18:30", end: "20:00", title: "晚餐", icon: "fa-utensils", desc: "海老どて食堂 (備案)", location: "海老どて食堂 エスカ店" }
+                    { time: "18:30", end: "20:00", title: "晚餐", icon: "fa-utensils", desc: "海老どて食堂 (名古屋地下街 如果不想吃可以選別的)", location: "海老どて食堂 エスカ店" }
+                    { time: "20:00", end: "20:30", title: "返回住宿", icon: "fa-bed", desc: "有力氣的話可以去永旺逛逛" }
                 ]
             },
             {
@@ -261,7 +263,7 @@
                     { time: "11:45", end: "12:45", title: "Gate Tower/高島屋 午餐", icon: "fa-utensils" },
                     { time: "13:00", end: "15:00", title: "Gate Tower Mall 逛街", icon: "fa-shopping-bag" },
                     { time: "15:00", end: "16:00", title: "Check In 休息", icon: "fa-bed", important: true },
-                    { time: "17:30", end: "20:00", title: "名古屋站周邊晚餐", icon: "fa-utensils" }
+                    { time: "17:30", end: "20:00", title: "名古屋站周邊晚餐/逛街、伴手禮", icon: "fa-utensils" }
                 ]
             },
             {
@@ -269,8 +271,8 @@
                 day: "週五",
                 hotel: "Home Sweet Home",
                 events: [
-                    { time: "09:00", end: "10:00", title: "名鐵 μ-SKY → 機場", icon: "fa-train", important: true },
-                    { time: "10:00", end: "12:05", title: "報到、出境、免稅店", icon: "fa-passport" },
+                    { time: "08:00", end: "09:00", title: "名鐵 μ-SKY → 機場", icon: "fa-train", important: true },
+                    { time: "09:00", end: "12:05", title: "報到、出境、免稅店", icon: "fa-passport" },
                     { time: "12:05", end: "14:40", title: "NGO ✈️ TPE (CI155)", icon: "fa-plane-departure" }
                 ]
             }
@@ -310,7 +312,7 @@
         const defaultPackingList = [
             "護照 (有效期6個月以上)", "eSIM / 漫遊開通", "日幣 (現金)", "Visit Japan Web截圖", 
             "行動電源 & 充電線", "常備藥品 (胃藥/止痛)", "牙刷牙膏", "信用卡 (海外回饋高)", 
-            "保暖衣物", "舒適好走的鞋"
+            "保暖衣物", "舒適好走的鞋", "暖暖包", "口罩"
         ];
 
         // --- 邏輯區 ---
