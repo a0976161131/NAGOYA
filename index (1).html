@@ -234,7 +234,7 @@
                     { time: "12:30", end: "16:00", title: "犬山城 ＆ 城下町", icon: "fa-chess-rook", desc: "三光稻荷神社洗錢 (準備台/澳幣)", location: "犬山城" },
                     { time: "17:30", end: "18:00", title: "歸還和服 → 榮", icon: "fa-subway" },
                     { time: "18:30", end: "19:30", title: "榮商圈晚餐", icon: "fa-utensils", location: "榮商圈" },
-                    { time: "19:30", end: "20:30", title: "中部電力塔/綠洲21 夜景", icon: "fa-tower-observation", desc: "久屋大通散步", location: "中部電力 MIRAI TOWER" }, // 修正：加上逗號
+                    { time: "19:30", end: "20:30", title: "中部電力塔/綠洲21 夜景", icon: "fa-tower-observation", desc: "久屋大通散步", location: "中部電力 MIRAI TOWER" },
                     { time: "21:30", end: "22:00", title: "返回住宿", icon: "fa-bed", desc: "記得買明天的早餐" }
                 ]
             },
@@ -248,7 +248,7 @@
                     { time: "13:00", end: "13:40", title: "午餐：味之与平", icon: "fa-utensils", desc: "不用吃太飽，留胃逛老街", location: "味之与平" },
                     { time: "13:50", end: "15:40", title: "飛驒高山老街", icon: "fa-store", location: "飛驒高山老街" },
                     { time: "18:00", end: "18:20", title: "返回名古屋市區", icon: "fa-bus" },
-                    { time: "18:30", end: "20:00", title: "晚餐", icon: "fa-utensils", desc: "海老どて食堂 (名古屋地下街)", location: "海老どて食堂 エスカ店" }, // 修正：加上逗號
+                    { time: "18:30", end: "20:00", title: "晚餐", icon: "fa-utensils", desc: "海老どて食堂 (名古屋地下街)", location: "海老どて食堂 エスカ店" },
                     { time: "20:00", end: "20:30", title: "返回住宿", icon: "fa-bed", desc: "有力氣的話可以去永旺逛逛" }
                 ]
             },
@@ -359,7 +359,7 @@
             html += dayData.events.map(event => {
                 const isImportant = event.important ? 'border-l-4 border-[#dca856] bg-[#fffcf5]' : 'border-l-4 border-transparent bg-white';
                 const timeColor = event.important ? 'text-[#dca856]' : 'text-[#769a9e]';
-                // 修正：修正了 URL 字串拼接語法
+                // 修正了地圖連結的語法
                 const mapBtn = event.location ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}" target="_blank" class="mt-2 inline-flex items-center text-xs text-white bg-[#5e8b7e] px-3 py-1.5 rounded-full hover:bg-[#4a7266] transition-colors shadow-sm"><i class="fas fa-map-marker-alt mr-1.5"></i> 導航</a>` : '';
                 return `<div class="relative pl-8 pb-1 group"><div class="absolute left-0 top-1 w-8 flex flex-col items-center z-10"><div class="w-3 h-3 rounded-full bg-white border-2 border-[#5e8b7e] group-hover:scale-125 transition-transform"></div></div><div class="watercolor-card p-4 mb-4 ${isImportant}"><div class="flex justify-between items-start mb-1"><span class="font-mono text-sm font-bold ${timeColor}">${event.time} - ${event.end}</span><i class="fas ${event.icon} text-gray-300 text-sm"></i></div><h3 class="text-lg font-bold text-gray-800 mb-1 leading-tight">${event.title}</h3>${event.desc ? `<p class="text-sm text-gray-500 mb-2 leading-relaxed">${event.desc}</p>` : ''}${mapBtn}</div></div>`;
             }).join('');
@@ -379,6 +379,41 @@
         function renderChecklist() {
             const container = document.getElementById('checklist-container');
             const savedState = JSON.parse(localStorage.getItem('trip_checklist_state')) || {};
+            
+            // 修正這裡：原本程式碼斷掉，這裡補上生成 Checklist 的 HTML 邏輯
             container.innerHTML = defaultPackingList.map((item, index) => {
                 const isChecked = savedState[item] ? 'checked' : '';
-                return `<div class="flex items-center gap-3 p-2 border-b border-gray-50 last:border-0 hover:bg-gray-50 rounded-lg transition-colors">
+                return `
+                <div class="flex items-center gap-3 p-2 border-b border-gray-50 last:border-0 hover:bg-gray-50 rounded-lg transition-colors">
+                    <input type="checkbox" id="check-${index}" class="custom-checkbox hidden" ${isChecked} onchange="toggleCheck('${item}')">
+                    <label for="check-${index}" class="text-sm text-gray-700 flex-1 cursor-pointer select-none">${item}</label>
+                </div>`;
+            }).join('');
+        }
+
+        function toggleCheck(item) {
+            const savedState = JSON.parse(localStorage.getItem('trip_checklist_state')) || {};
+            if (savedState[item]) {
+                delete savedState[item];
+            } else {
+                savedState[item] = true;
+            }
+            localStorage.setItem('trip_checklist_state', JSON.stringify(savedState));
+            renderChecklist();
+        }
+
+        function initMemo() {
+            const memoArea = document.getElementById('user-memo');
+            if (memoArea) {
+                // 讀取存檔
+                memoArea.value = localStorage.getItem('trip_memo') || '';
+                
+                // 綁定輸入事件，自動存檔
+                memoArea.addEventListener('input', function() {
+                    localStorage.setItem('trip_memo', this.value);
+                });
+            }
+        }
+    </script>
+</body>
+</html>
