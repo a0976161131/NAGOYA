@@ -4,33 +4,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>名古屋・冬之旅</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Yomogi&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Yomogi&family=Noto+Sans+TC:wght@400;500;700&swap" rel="stylesheet">
 
     <style>
+        /* 自定義樣式設定 */
         :root {
             --bg-paper: #f9f7f2;
-            --primary: #769a9e;
-            --secondary: #e6a496;
-            --accent: #dca856;
+            --primary: #769a9e; /* 莫蘭迪綠 */
+            --secondary: #e6a496; /* 珊瑚粉 */
+            --accent: #dca856; /* 芥末黃 */
             --text-main: #4a4a4a;
+            --text-light: #7a7a7a;
         }
 
         body {
-            font-family: 'Noto Sans TC', sans-serif;
+            /* 全域字體改為思源黑體/台北黑體風格 */
+            font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background-color: var(--bg-paper);
             color: var(--text-main);
+            /* 模擬紙張紋理 */
             background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+            -webkit-font-smoothing: antialiased;
         }
 
-        h1, h2, .handwriting { font-family: 'Yomogi', cursive; }
+        h1, h2, .handwriting {
+            font-family: 'Yomogi', cursive;
+        }
 
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        /* 隱藏捲軸但保留功能 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
 
+        /* 水彩風格卡片 (不規則邊框) */
         .watercolor-card {
             background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(4px);
@@ -39,29 +56,73 @@
             border: 1px solid rgba(0,0,0,0.02);
             transition: transform 0.2s ease;
         }
+        
+        .watercolor-card:active {
+            transform: scale(0.98);
+        }
 
+        /* 水彩按鈕 */
+        .btn-water {
+            border-radius: 25px 255px 25px 255px / 255px 25px 255px 25px;
+            transition: all 0.3s ease;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* 時間軸線條 */
         .timeline-line::before {
             content: '';
             position: absolute;
-            top: 0; bottom: 0; left: 14px;
+            top: 0;
+            bottom: 0;
+            left: 14px;
             width: 2px;
             background: #e0e0e0;
+            border-radius: 2px;
             z-index: 0;
         }
 
-        .nav-item.active { color: var(--primary); font-weight: bold; }
+        /* 底部導航選中態 */
+        .nav-item.active {
+            color: var(--primary);
+            font-weight: bold;
+        }
         .nav-item.active i {
             background-color: rgba(118, 154, 158, 0.2);
             border-radius: 50%;
             padding: 8px;
+            transform: scale(1.1);
         }
 
-        .tab-content { display: none; animation: fadeIn 0.4s ease-out; }
-        .tab-content.active { display: block; }
+        /* 勾選框樣式 */
+        .custom-checkbox:checked + label {
+            text-decoration: line-through;
+            color: #aaa;
+            opacity: 0.7;
+        }
+        
+        /* 頁面切換動畫 */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+        .tab-content.active {
+            display: block;
+        }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        .memo-link {
+            display: inline-block;
+            margin: 4px;
+            padding: 4px 12px;
+            background-color: var(--secondary);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            text-decoration: none;
         }
     </style>
 </head>
@@ -104,7 +165,8 @@
         <div class="mb-20">
             <h2 class="text-xl handwriting mb-3 text-[#dca856]"><i class="fas fa-pen-nib mr-2"></i>Memo</h2>
             <div class="bg-white p-4 rounded-[20px] shadow-sm border border-gray-100">
-                <textarea id="user-memo" class="w-full h-40 p-3 text-gray-700 bg-[#fdfbf7] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#dca856]/50 resize-none text-sm" placeholder="隨手記下想去的店..."></textarea>
+                <textarea id="user-memo" class="w-full h-40 p-3 text-gray-700 bg-[#fdfbf7] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#dca856]/50 resize-none text-sm" placeholder="隨手記下想去的店、購物清單..."></textarea>
+                <div id="memo-links-area" class="mt-3 flex flex-wrap gap-2"></div>
             </div>
         </div>
     </section>
@@ -114,40 +176,244 @@
             <a href="https://www.jma.go.jp/bosai/forecast/" target="_blank" class="watercolor-card p-4 flex flex-col items-center justify-center gap-2 text-center text-[#5e8b7e]">
                 <i class="fas fa-cloud-sun text-3xl"></i>
                 <span class="font-bold">天氣預報</span>
+                <span class="text-xs text-gray-400">日本氣象廳</span>
             </a>
             <a href="https://vjw-lp.digital.go.jp/en/" target="_blank" class="watercolor-card p-4 flex flex-col items-center justify-center gap-2 text-center text-[#e6a496]">
                 <i class="fas fa-qrcode text-3xl"></i>
                 <span class="font-bold">Visit Japan Web</span>
+                <span class="text-xs text-gray-400">入境登錄</span>
             </a>
         </div>
     </section>
 
-    <nav class="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-lg border-t border-gray-200 pb-safe pt-2 px-6 flex justify-between items-center z-50 h-[80px] rounded-t-[20px] shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
-        <button onclick="switchTab('plan')" class="nav-item active flex flex-col items-center gap-1 text-gray-400 w-16" id="nav-plan">
+    <nav class="fixed bottom-0 left-0 w-full bg-white/90 backdrop-filter backdrop-blur-lg border-t border-gray-200 pb-safe pt-2 px-6 flex justify-between items-center z-50 h-[80px] rounded-t-[20px] shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
+        <button onclick="switchTab('plan')" class="nav-item active flex flex-col items-center gap-1 text-gray-400 transition-colors w-16" id="nav-plan">
             <i class="fas fa-calendar-alt text-lg"></i>
             <span class="text-[10px]">行程</span>
         </button>
-        <button onclick="switchTab('guide')" class="nav-item flex flex-col items-center gap-1 text-gray-400 w-16" id="nav-guide">
+        <button onclick="switchTab('guide')" class="nav-item flex flex-col items-center gap-1 text-gray-400 transition-colors w-16" id="nav-guide">
             <i class="fas fa-book-open text-lg"></i>
             <span class="text-[10px]">導覽</span>
         </button>
-        <button onclick="switchTab('lists')" class="nav-item flex flex-col items-center gap-1 text-gray-400 w-16" id="nav-lists">
+        <button onclick="switchTab('lists')" class="nav-item flex flex-col items-center gap-1 text-gray-400 transition-colors w-16" id="nav-lists">
             <i class="fas fa-list-check text-lg"></i>
             <span class="text-[10px]">清單</span>
         </button>
-        <button onclick="switchTab('info')" class="nav-item flex flex-col items-center gap-1 text-gray-400 w-16" id="nav-info">
+        <button onclick="switchTab('info')" class="nav-item flex flex-col items-center gap-1 text-gray-400 transition-colors w-16" id="nav-info">
             <i class="fas fa-info-circle text-lg"></i>
             <span class="text-[10px]">資訊</span>
         </button>
     </nav>
 
     <script>
+        // 資料區
         const itineraryData = [
             {
-                date: "2/9", day: "週一", hotel: "牧野東公園旁住宿",
+                date: "2/9",
+                day: "週一",
+                hotel: "牧野東公園旁住宿",
                 events: [
                     { time: "05:00", end: "05:30", title: "前往桃園機場", icon: "fa-car", important: true },
                     { time: "07:35", end: "11:05", title: "TPE ✈️ NGO (CI154)", icon: "fa-plane", desc: "抵達中部國際機場 T1" },
                     { time: "12:00", end: "12:20", title: "移動：機場 → 常滑", icon: "fa-train" },
-                    { time: "12:20", end: "14:00", title: "常滑散策", icon: "fa-cat", location: "常滑老街" },
-                    { time: "15
+                    { time: "12:20", end: "14:00", title: "常滑散策", icon: "fa-cat", desc: "常滑老街、招財貓道、吃地瓜", location: "常滑老街" },
+                    { time: "14:40", end: "15:10", title: "移動：名古屋站 → 住宿", icon: "fa-suitcase" },
+                    { time: "15:40", end: "17:30", title: "熱田神宮", icon: "fa-torii-gate", desc: "參拜、散步、商店街小吃", location: "熱田神宮" },
+                    { time: "18:00", end: "21:30", title: "蓬萊軒 鰻魚飯", icon: "fa-utensils", desc: "松阪屋店，排隊＋用餐，空檔逛 PARCO", location: "蓬萊軒 松坂屋店" },
+                    { time: "21:30", end: "22:00", title: "返回住宿", icon: "fa-bed" }
+                ]
+            },
+            {
+                date: "2/10",
+                day: "週二",
+                hotel: "牧野東公園旁住宿",
+                events: [
+                    { time: "07:10", end: "07:30", title: "前往早餐店/睡覺", icon: "fa-walking" },
+                    { time: "08:00", end: "08:45", title: "Tsubame Bread & Milk", icon: "fa-bread-slice", desc: "名古屋早餐店", location: "Tsubame Bread & Milk" },
+                    { time: "09:45", end: "12:30", title: "11PhotoStudio 和服換裝", icon: "fa-user-tie", desc: "換裝後前往犬山城拍照", location: "11PhotoStudio 名古屋" },
+                    { time: "12:30", end: "16:00", title: "犬山城 ＆ 城下町", icon: "fa-chess-rook", desc: "三光稻荷神社洗錢 (準備台/澳幣)", location: "犬山城" },
+                    { time: "17:30", end: "18:00", title: "歸還和服 → 榮", icon: "fa-subway" },
+                    { time: "18:30", end: "19:30", title: "榮商圈晚餐", icon: "fa-utensils", location: "榮商圈" },
+                    { time: "19:30", end: "20:30", title: "中部電力塔/綠洲21 夜景", icon: "fa-tower-observation", desc: "久屋大通散步", location: "中部電力 MIRAI TOWER" },
+                    { time: "21:30", end: "22:00", title: "返回住宿", icon: "fa-bed", desc: "記得買明天的早餐" }
+                ]
+            },
+            {
+                date: "2/11",
+                day: "週三",
+                hotel: "牧野東公園旁住宿",
+                events: [
+                    { time: "08:00", end: "10:10", title: "移動：前往白川鄉", icon: "fa-bus", important: true },
+                    { time: "10:10", end: "11:50", title: "白川鄉合掌村", icon: "fa-snowflake", desc: "11:40 準備回停車場", location: "白川鄉合掌村" },
+                    { time: "13:00", end: "13:40", title: "午餐：味之与平", icon: "fa-utensils", desc: "不用吃太飽，留胃逛老街", location: "味之与平" },
+                    { time: "13:50", end: "15:40", title: "飛驒高山老街", icon: "fa-store", location: "飛驒高山老街" },
+                    { time: "18:00", end: "18:20", title: "返回名古屋市區", icon: "fa-bus" },
+                    { time: "18:30", end: "20:00", title: "晚餐", icon: "fa-utensils", desc: "海老どて食堂 (名古屋地下街)", location: "海老どて食堂 エスカ店" },
+                    { time: "20:00", end: "20:30", title: "返回住宿", icon: "fa-bed", desc: "有力氣的話可以去永旺逛逛" }
+                ]
+            },
+            {
+                date: "2/12",
+                day: "週四",
+                hotel: "JR Gate Tower Hotel",
+                events: [
+                    { time: "08:30", end: "09:00", title: "Airbnb 退房", icon: "fa-door-open" },
+                    { time: "09:00", end: "09:20", title: "飯店寄放行李", icon: "fa-luggage-cart", location: "Nagoya JR Gate Tower Hotel" },
+                    { time: "09:45", end: "11:15", title: "名古屋城", icon: "fa-archway", desc: "參觀本丸御殿", location: "名古屋城" },
+                    { time: "11:45", end: "12:45", title: "Gate Tower/高島屋 午餐", icon: "fa-utensils" },
+                    { time: "13:00", end: "15:00", title: "Gate Tower Mall 逛街", icon: "fa-shopping-bag" },
+                    { time: "15:00", end: "16:00", title: "Check In 休息", icon: "fa-bed", important: true },
+                    { time: "17:30", end: "20:00", title: "名古屋站周邊晚餐/逛街、伴手禮", icon: "fa-utensils" }
+                ]
+            },
+            {
+                date: "2/13",
+                day: "週五",
+                hotel: "Home Sweet Home",
+                events: [
+                    { time: "08:00", end: "09:00", title: "名鐵 μ-SKY → 機場", icon: "fa-train", important: true },
+                    { time: "09:00", end: "12:05", title: "報到、出境、免稅店", icon: "fa-passport" },
+                    { time: "12:05", end: "14:40", title: "NGO ✈️ TPE (CI155)", icon: "fa-plane-departure" }
+                ]
+            }
+        ];
+
+        const guideData = [
+            {
+                title: "白川鄉合掌村",
+                img: "https://d1grca2t3zpuug.cloudfront.net/2024/09/66e26c5a140b9-870x500.webp",
+                desc: "世界文化遺產。特色的「合掌造」建築是為了應對豪雪地帶而生，屋頂呈現60度斜角，形狀像雙手合十，故名合掌村。這裡宛如童話世界，記得嘗試這裡的五平餅與飛驒牛串燒。",
+                location: "Shirakawa-go",
+                hasMap: true
+            },
+            {
+                title: "熱田神宮",
+                img: "https://static.gltjp.com/glt/data/article/21000/20401/20241119_023936_de5ef996_w1920.webp",
+                desc: "日本三大神宮之一，供奉著日本三大神器之一的「草薙劍」。神宮內古樹參天，有著名的「信長牆」。來到這裡必吃宮きしめん（宮寬麵）或附近的蓬萊軒鰻魚飯。",
+                location: "Atsuta Shrine",
+                hasMap: false
+            },
+            {
+                title: "犬山城",
+                img: "https://d1grca2t3zpuug.cloudfront.net/2025/12/2025inuyamajo16-870x500-1765244239.webp",
+                desc: "日本現存最古老的天守閣之一，是國寶五城之一。位於木推川旁的小山丘上，視野極佳。山下的三光稻荷神社有粉紅色的愛心繪馬，還有可以「洗錢」的神水，據說洗過的錢會倍增回來！",
+                location: "Inuyama Castle",
+                hasMap: false
+            },
+            {
+                title: "名古屋城",
+                img: "https://res.klook.com/images/w_1200,h_630,c_fill,q_65/activities/mv6lrp0mrcl0chali7mm/名古屋城.jpg",
+                desc: "德川家康下令建造的平地城堡，屋頂上的金鯱是名古屋的象徵。必看的是修復後的「本丸御殿」，內部金碧輝煌的障壁畫極為震撼，展現了江戶時代武家文化的奢華。",
+                location: "Nagoya Castle",
+                hasMap: true
+            }
+        ];
+
+        const defaultPackingList = [
+            "護照 (有效期6個月以上)", "eSIM / 漫遊開通", "日幣 (現金)", "Visit Japan Web截圖", 
+            "行動電源 & 充電線", "常備藥品 (胃藥/止痛)", "牙刷牙膏", "信用卡 (海外回饋高)", 
+            "保暖衣物", "舒適好走的鞋", "暖暖包", "口罩"
+        ];
+
+        // --- 邏輯區 ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderDateSelector();
+            renderItinerary(0);
+            renderGuide();
+            renderChecklist();
+            initMemo();
+        });
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.getElementById('nav-' + tabId).classList.add('active');
+            window.scrollTo(0,0);
+        }
+
+        function renderDateSelector() {
+            const container = document.getElementById('date-scroll');
+            container.innerHTML = itineraryData.map((day, index) => `
+                <button onclick="renderItinerary(${index})" id="date-btn-${index}" 
+                    class="date-btn flex-shrink-0 px-4 py-2 rounded-2xl border border-gray-100 shadow-sm bg-white min-w-[70px] text-center transition-all ${index === 0 ? 'bg-[#5e8b7e] text-white ring-2 ring-[#5e8b7e]/50' : 'text-gray-500'}">
+                    <div class="text-xs font-bold mb-1">${day.date}</div>
+                    <div class="text-[10px] opacity-80">${day.day}</div>
+                </button>
+            `).join('');
+        }
+
+        function renderItinerary(index) {
+            document.querySelectorAll('.date-btn').forEach(btn => {
+                btn.classList.remove('bg-[#5e8b7e]', 'text-white', 'ring-2');
+                btn.classList.add('text-gray-500', 'bg-white');
+            });
+            const activeBtn = document.getElementById(`date-btn-${index}`);
+            activeBtn.classList.remove('text-gray-500', 'bg-white');
+            activeBtn.classList.add('bg-[#5e8b7e]', 'text-white', 'ring-2', 'ring-[#5e8b7e]/50');
+
+            const dayData = itineraryData[index];
+            const container = document.getElementById('itinerary-container');
+            let html = `<div class="pl-8 mb-6"><div class="inline-block bg-[#e08e79]/10 text-[#e08e79] px-3 py-1 rounded-full text-xs font-bold border border-[#e08e79]/20"><i class="fas fa-bed mr-1"></i> ${dayData.hotel}</div></div>`;
+
+            html += dayData.events.map(event => {
+                const isImportant = event.important ? 'border-l-4 border-[#dca856] bg-[#fffcf5]' : 'border-l-4 border-transparent bg-white';
+                const timeColor = event.important ? 'text-[#dca856]' : 'text-[#769a9e]';
+                // 修正了地圖連結的語法
+                const mapBtn = event.location ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}" target="_blank" class="mt-2 inline-flex items-center text-xs text-white bg-[#5e8b7e] px-3 py-1.5 rounded-full hover:bg-[#4a7266] transition-colors shadow-sm"><i class="fas fa-map-marker-alt mr-1.5"></i> 導航</a>` : '';
+                return `<div class="relative pl-8 pb-1 group"><div class="absolute left-0 top-1 w-8 flex flex-col items-center z-10"><div class="w-3 h-3 rounded-full bg-white border-2 border-[#5e8b7e] group-hover:scale-125 transition-transform"></div></div><div class="watercolor-card p-4 mb-4 ${isImportant}"><div class="flex justify-between items-start mb-1"><span class="font-mono text-sm font-bold ${timeColor}">${event.time} - ${event.end}</span><i class="fas ${event.icon} text-gray-300 text-sm"></i></div><h3 class="text-lg font-bold text-gray-800 mb-1 leading-tight">${event.title}</h3>${event.desc ? `<p class="text-sm text-gray-500 mb-2 leading-relaxed">${event.desc}</p>` : ''}${mapBtn}</div></div>`;
+            }).join('');
+            container.innerHTML = html;
+        }
+
+        function renderGuide() {
+            const container = document.getElementById('guide-container');
+            container.innerHTML = guideData.map((spot) => `
+                <div class="watercolor-card overflow-hidden bg-white">
+                    <div class="h-48 overflow-hidden relative"><img src="${spot.img}" alt="${spot.title}" class="w-full h-full object-cover"><div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/60 to-transparent p-4 pt-12"><h3 class="text-white text-xl font-bold tracking-widest">${spot.title}</h3></div></div>
+                    <div class="p-5"><p class="text-gray-600 text-sm leading-7 text-justify font-light"><span class="text-4xl float-left mr-2 mt-[-10px] handwriting text-[#e08e79]">${spot.desc.charAt(0)}</span>${spot.desc.slice(1)}</p></div>
+                </div>
+            `).join('');
+        }
+
+        function renderChecklist() {
+            const container = document.getElementById('checklist-container');
+            const savedState = JSON.parse(localStorage.getItem('trip_checklist_state')) || {};
+            
+            // 修正這裡：原本程式碼斷掉，這裡補上生成 Checklist 的 HTML 邏輯
+            container.innerHTML = defaultPackingList.map((item, index) => {
+                const isChecked = savedState[item] ? 'checked' : '';
+                return `
+                <div class="flex items-center gap-3 p-2 border-b border-gray-50 last:border-0 hover:bg-gray-50 rounded-lg transition-colors">
+                    <input type="checkbox" id="check-${index}" class="custom-checkbox hidden" ${isChecked} onchange="toggleCheck('${item}')">
+                    <label for="check-${index}" class="text-sm text-gray-700 flex-1 cursor-pointer select-none">${item}</label>
+                </div>`;
+            }).join('');
+        }
+
+        function toggleCheck(item) {
+            const savedState = JSON.parse(localStorage.getItem('trip_checklist_state')) || {};
+            if (savedState[item]) {
+                delete savedState[item];
+            } else {
+                savedState[item] = true;
+            }
+            localStorage.setItem('trip_checklist_state', JSON.stringify(savedState));
+            renderChecklist();
+        }
+
+        function initMemo() {
+            const memoArea = document.getElementById('user-memo');
+            if (memoArea) {
+                // 讀取存檔
+                memoArea.value = localStorage.getItem('trip_memo') || '';
+                
+                // 綁定輸入事件，自動存檔
+                memoArea.addEventListener('input', function() {
+                    localStorage.setItem('trip_memo', this.value);
+                });
+            }
+        }
+    </script>
+</body>
+</html>
