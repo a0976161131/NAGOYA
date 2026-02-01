@@ -166,7 +166,6 @@
             object-fit: contain;
             background: white;
             margin-bottom: 5px;
-            /* 防止破圖時太難看 */
             min-height: 100px; 
         }
     </style>
@@ -216,6 +215,15 @@
 
     <section id="info" class="tab-content px-4 pt-4 space-y-6">
         
+        <div>
+            <h3 class="text-lg font-bold text-[#769a9e] mb-2"><i class="fas fa-cloud-sun-rain mr-2"></i>名古屋五日預報</h3>
+            <div id="weekly-forecast-container" class="flex overflow-x-auto no-scrollbar gap-3 pb-2">
+                <div class="w-full text-center text-gray-400 text-xs py-4">
+                    <i class="fas fa-spinner fa-spin mr-1"></i> 載入氣象資訊中...
+                </div>
+            </div>
+        </div>
+
         <div>
             <h3 class="text-lg font-bold text-[#e6a496] mb-2"><i class="fas fa-qrcode mr-2"></i>VJW 通關碼</h3>
             <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-center justify-between" onclick="openVJWModal()">
@@ -419,7 +427,6 @@
     <script>
         // ==========================================
         // VJW 圖片設定區 
-        // ⚠️ 請修改 url 為您的 GitHub 圖片路徑 (例如: "./images/dad.jpg")
         // ==========================================
         const vjwImages = [
             { name: "盧岳懋", url: "https://placehold.co/300x300/eee/31343C?text=QR+Dad" },
@@ -432,7 +439,6 @@
         // ==========================================
         // 天氣資料設定
         // ==========================================
-        // 1. 靜態備份資料 (當日期太久遠時使用)
         const staticWeatherData = {
             "2/9":  { min: 3, max: 10, icon: "fa-cloud-sun", condition: "晴時多雲" },
             "2/10": { min: 2, max: 9,  icon: "fa-cloud", condition: "多雲" },
@@ -441,7 +447,6 @@
             "2/13": { min: 2, max: 12, icon: "fa-sun", condition: "晴朗" }
         };
 
-        // 2. 地點經緯度 (Open-Meteo 使用)
         const locationCoords = {
             "Nagoya": { lat: 35.1815, lon: 136.9066 },
             "Tokoname": { lat: 34.8893, lon: 136.8346 },
@@ -605,7 +610,6 @@
             }
         ];
 
-        // 更新的導覽資料
         const guideData = [
             {
                 category: "古蹟景點導覽",
@@ -709,6 +713,8 @@
             renderItinerary(0);
             renderGuide();
             renderChecklist();
+            // 啟動五日預報 API
+            fetchWeeklyForecast();
         });
 
         function switchTab(tabId) {
@@ -732,7 +738,6 @@
 
         // --- Open-Meteo 天氣處理邏輯 ---
 
-        // 1. WMO 代碼轉文字圖示
         function getWeatherInfo(code) {
             if (code === 0) return { icon: "fa-sun", text: "晴朗", color: "text-orange-400" };
             if ([1, 2, 3].includes(code)) return { icon: "fa-cloud-sun", text: "多雲", color: "text-gray-500" };
@@ -744,12 +749,11 @@
             return { icon: "fa-question", text: "未知", color: "text-gray-400" };
         }
 
-        // 2. 非同步獲取天氣
+        // 1. 獲取單日天氣 (行程頁用)
         async function fetchWeather(lat, lon, dateString, elementId, fallbackData) {
             const container = document.getElementById(elementId);
             
             // 設定年份 (行程是 2026)
-            // 💡 若要測試「即時天氣」，可暫時將下方改為 "2025" 或當前年份
             const year = "2026"; 
             
             const [month, day] = dateString.split('/');
@@ -761,16 +765,11 @@
             const diffTime = targetDate - today;
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-            // 如果日期太遠 (>14天) 或 是過去日期，直接使用靜態備份資料
-            // 這樣就不會因為還沒到 2026 年而顯示錯誤
             if (diffDays > 14 || diffDays < 0) {
-                // 為了除錯方便，這裡可以 console.log
-                // console.log(`日期 ${formattedDate} 超出預報範圍，使用靜態資料`);
                 renderWeatherCard(container, fallbackData, false);
                 return;
             }
 
-            // 顯示讀取中動畫
             container.innerHTML = `
                 <div class="watercolor-card p-4 mb-4 mx-2 flex items-center justify-center gap-2 text-gray-400">
                     <i class="fas fa-spinner fa-spin"></i> 正在更新當地天氣...
@@ -808,18 +807,93 @@
             }
         }
 
-        // 3. 渲染天氣卡片
+        // 2. 獲取五日預報 (資訊頁用)
+        async function fetchWeeklyForecast() {
+            const container = document.getElementById('weekly-forecast-container');
+            const lat = 35.1815; // 名古屋
+            const lon = 136.9066;
+            const startDate = "2026-02-09";
+            const endDate = "2026-02-13";
+            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&start_date=${startDate}&end_date=${endDate}`;
+
+            try {
+                const targetDate = new Date(startDate);
+                const today = new Date();
+                const diffTime = targetDate - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                let dailyData = [];
+
+                // 如果日期太遠，使用靜態備份資料模擬
+                if (diffDays > 14 || diffDays < 0) {
+                    const dates = ["2/9", "2/10", "2/11", "2/12", "2/13"];
+                    dailyData = dates.map(d => ({
+                        date: d,
+                        ...staticWeatherData[d]
+                    }));
+                } else {
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    
+                    if (data.daily && data.daily.time) {
+                        dailyData = data.daily.time.map((t, i) => {
+                            const dateObj = new Date(t);
+                            const month = dateObj.getMonth() + 1;
+                            const day = dateObj.getDate();
+                            const info = getWeatherInfo(data.daily.weathercode[i]);
+                            return {
+                                date: `${month}/${day}`,
+                                min: Math.round(data.daily.temperature_2m_min[i]),
+                                max: Math.round(data.daily.temperature_2m_max[i]),
+                                icon: info.icon,
+                                condition: info.text
+                            };
+                        });
+                    }
+                }
+
+                container.innerHTML = dailyData.map(day => `
+                    <div class="flex-shrink-0 w-20 bg-white border border-gray-100 rounded-xl p-2 text-center shadow-sm flex flex-col justify-between">
+                        <div class="text-[10px] text-gray-400 font-bold mb-1">${day.date}</div>
+                        <div class="text-[#769a9e] mb-1"><i class="fas ${day.icon} text-xl"></i></div>
+                        <div class="text-xs font-bold text-gray-600">${day.min}°-${day.max}°</div>
+                        <div class="text-[10px] text-gray-400 scale-90">${day.condition}</div>
+                    </div>
+                `).join('');
+
+            } catch (e) {
+                console.error("Weekly forecast error", e);
+                container.innerHTML = `<div class="text-xs text-gray-400 w-full text-center">暫無法取得預報</div>`;
+            }
+        }
+
         function renderWeatherCard(container, data, isLive) {
-            let outfitSuggestion = data.outfit || "根據氣溫調整穿著。";
-            
-            // 簡單的即時動態穿搭建議修正
-            if(isLive) {
-                if(data.max < 5) outfitSuggestion = "⚠️ 預報極寒！請務必穿著發熱衣、羽絨外套並配戴手套。";
-                else if(data.max < 15) outfitSuggestion = "氣溫偏低，建議洋蔥式穿搭，室內有暖氣。";
+            // 結合原始建議與即時警報
+            let baseOutfit = data.outfit || "根據氣溫調整穿著。";
+            let alertMsg = "";
+            let iconColor = data.color || "text-[#769a9e]";
+
+            if (isLive) {
+                // 氣溫警示
+                if (data.max < 5) {
+                    alertMsg = "⚠️ 寒流警報！請務必穿著發熱衣、圍巾與手套。";
+                } else if (data.max > 25) {
+                    alertMsg = "氣溫回暖，建議改為輕便外套。";
+                }
+
+                // 降雨/降雪警示
+                const rainCodes = ["毛毛雨", "下雨", "雷雨"];
+                const snowCodes = ["下雪"];
+                
+                if (rainCodes.some(c => data.condition.includes(c))) {
+                    alertMsg += " 🌧️ 預報有雨，請攜帶折傘或防水鞋。";
+                } else if (snowCodes.some(c => data.condition.includes(c))) {
+                    alertMsg += " ❄️ 預報下雪，鞋子務必選擇防滑款式！";
+                }
             }
 
+            const finalOutfit = alertMsg ? `<span class="text-red-500 font-bold block mb-1">${alertMsg}</span>${baseOutfit}` : baseOutfit;
             const liveTag = isLive ? `<span class="bg-red-500 text-white text-[10px] px-1 rounded ml-1 animate-pulse">LIVE</span>` : '';
-            const iconColor = data.color || "text-[#769a9e]";
 
             container.innerHTML = `
                 <div class="watercolor-card p-4 bg-gradient-to-br from-[#fdfbf7] to-[#fff] border-l-4 border-[#769a9e] mb-4 mx-2">
@@ -836,7 +910,7 @@
                             </div>
                             <div class="text-sm text-gray-600 font-medium leading-relaxed">
                                 <i class="fas fa-tshirt text-[#e6a496] mr-1"></i>
-                                ${outfitSuggestion}
+                                <span>${finalOutfit}</span>
                             </div>
                         </div>
                     </div>
@@ -844,7 +918,6 @@
             `;
         }
 
-        // 更新後的主行程渲染函式
         function renderItinerary(index) {
             document.querySelectorAll('.date-btn').forEach(btn => {
                 btn.classList.remove('bg-[#5e8b7e]', 'text-white', 'ring-2');
@@ -857,13 +930,11 @@
             const dayData = itineraryData[index];
             const locKey = dayData.locationKey || "Nagoya";
             
-            // 準備備份用的靜態資料 (結合穿搭建議)
             const fallbackWeather = { 
                 ...staticWeatherData[dayData.date] || { min: 5, max: 12, icon: "fa-cloud-sun", condition: "多雲時晴" },
                 outfit: dayData.outfit 
             };
 
-            // 呼叫天氣 API
             if (locationCoords[locKey]) {
                 fetchWeather(
                     locationCoords[locKey].lat, 
@@ -940,7 +1011,6 @@
             document.body.style.overflow = '';
         }
         
-        // VJW Modal 相關功能
         function openVJWModal() {
             const container = document.getElementById('vjw-grid-container');
             container.innerHTML = vjwImages.map(person => `
@@ -991,7 +1061,6 @@
             }).join('');
         }
         
-        // 修改後的 Checklist (純文字清單)
         function renderChecklist() {
             const container = document.getElementById('checklist-container');
             container.innerHTML = defaultPackingList.map(item => `
@@ -1002,7 +1071,6 @@
             `).join('');
         }
 
-        // 匯率計算功能
         function calculateRate(source) {
             const rateInput = document.getElementById('exchange-rate');
             const jpyInput = document.getElementById('input-jpy');
