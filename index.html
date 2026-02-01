@@ -6,922 +6,339 @@
     <title>名古屋・冬之旅</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#769a9e",
+                        secondary: "#e6a496",
+                        accent: "#dca856",
+                        paper: "#f9f7f2",
+                        dark: "#4a4a4a",
+                    },
+                    fontFamily: {
+                        handwriting: ['"Yomogi"', 'cursive'],
+                        sans: ['"Noto Sans TC"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Yomogi&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Yomogi&family=Noto+Sans+TC:wght@400;500;700&swap" rel="stylesheet">
+
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
-        /* 自定義樣式設定 */
-        :root {
-            --bg-paper: #f9f7f2;
-            --primary: #769a9e; /* 莫蘭迪綠 */
-            --secondary: #e6a496; /* 珊瑚粉 */
-            --accent: #dca856; /* 芥末黃 */
-            --text-main: #4a4a4a;
-            --text-light: #7a7a7a;
-            /* 標籤顏色 */
-            --tag-eat: #e67e22;
-            --tag-buy: #e74c3c;
-            --tag-go: #27ae60;
-            --tag-code: #2980b9;
-        }
-
-        body {
-            font-family: "Microsoft JhengHei", "PingFang TC", "Heiti TC", "Noto Sans TC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-paper);
-            color: var(--text-main);
-            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
-            -webkit-font-smoothing: antialiased;
-            font-weight: 500;
-        }
-
-        h1, h2, .handwriting {
-            font-family: 'Yomogi', "Microsoft JhengHei", cursive;
-        }
-
+        body { background-color: #f9f7f2; background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E"); }
+        .handwriting { font-family: 'Yomogi', cursive; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* 水彩風格卡片 */
-        .watercolor-card {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(4px);
-            border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
-            box-shadow: 2px 4px 12px rgba(0, 0, 0, 0.08);
-            border: 1px solid rgba(0,0,0,0.02);
-            transition: transform 0.2s ease;
-            cursor: pointer;
-        }
-        .watercolor-card:active { transform: scale(0.98); }
-
-        /* 時間軸線條 */
-        .timeline-line::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 14px;
-            width: 2px;
-            background: #e0e0e0;
-            border-radius: 2px;
-            z-index: 0;
-        }
-
-        /* 底部導航選中態 */
-        .nav-item.active { color: var(--primary); font-weight: bold; }
-        .nav-item.active i {
-            background-color: rgba(118, 154, 158, 0.2);
-            border-radius: 50%;
-            padding: 8px;
-            transform: scale(1.1);
-        }
-
-        /* 頁面切換動畫 */
-        .tab-content { display: none; animation: fadeIn 0.4s ease-out; }
-        .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* 影音卡片特定樣式 */
-        .yt-icon { color: #FF0000; }
-        .ig-icon { 
-            background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        /* Modal 彈窗樣式 */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 100;
-            backdrop-filter: blur(3px);
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        .modal-overlay.open { display: flex; }
-        .modal-content {
-            background: #fff;
-            width: 100%;
-            max-width: 400px;
-            max-height: 85vh;
-            overflow-y: auto;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            position: relative;
-            animation: slideUp 0.3s ease-out;
-        }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        /* 導遊分析標籤樣式 */
-        .guide-tag {
-            display: inline-block;
-            font-size: 0.75rem;
-            padding: 2px 8px;
-            border-radius: 4px;
-            margin-right: 4px;
-            font-weight: bold;
-            color: white;
-            margin-bottom: 4px;
-        }
-        .tag-eat { background-color: var(--tag-eat); }
-        .tag-buy { background-color: var(--tag-buy); }
-        .tag-go { background-color: var(--tag-go); }
-        .tag-code { background-color: var(--tag-code); font-family: monospace; letter-spacing: 1px;}
-
-        /* 自定義多人 Checklist 樣式 */
-        .family-check-grid {
-            display: grid;
-            grid-template-columns: 2fr repeat(5, 1fr);
-            gap: 4px;
-            align-items: center;
-        }
-        .family-check-header {
-            font-size: 0.7rem;
-            text-align: center;
-            color: #769a9e;
-            font-weight: bold;
-        }
-        .check-input {
-            width: 18px;
-            height: 18px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-            accent-color: #e6a496;
-            margin: 0 auto;
-            display: block;
-            cursor: pointer;
-        }
+        .ticket-notch { position: absolute; width: 1.5rem; height: 1.5rem; background-color: #f9f7f2; border-radius: 9999px; z-index: 10; top: 50%; transform: translateY(-50%); }
+        .keypad-btn:active { background-color: #e5e7eb; transform: scale(0.95); }
+        .animate-slideUp { animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
     </style>
 </head>
-<body class="pb-24">
+<body>
+    <div id="root"></div>
 
-    <header class="sticky top-0 z-50 bg-[#f9f7f2]/95 backdrop-blur-md px-4 py-3 shadow-sm border-b border-gray-200/50">
-        <div class="flex justify-between items-center">
-            <div>
-                <h1 class="text-2xl font-bold text-[#5e8b7e]">Nagoya Trip ❄️</h1>
-                <p class="text-xs text-gray-500 font-sans tracking-wide">2026.02.09 - 02.13</p>
-            </div>
-            <div class="text-right text-xs text-gray-600 bg-white/60 p-2 rounded-lg border border-gray-100 font-mono">
-                <div>🛫 CI154 07:35</div>
-                <div>🛬 CI155 12:05</div>
-            </div>
-        </div>
-    </header>
+    <script type="text/babel" data-type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, Timestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    <section id="plan" class="tab-content active px-4 pt-4">
-        <div class="flex overflow-x-auto no-scrollbar gap-3 mb-4 pb-2" id="date-scroll"></div>
-        <div id="weather-card-container"></div>
-        <div id="itinerary-container" class="space-y-6 relative timeline-line mt-4"></div>
-        <p class="text-center text-xs text-gray-400 mt-4">✨ 點擊行程卡片查看導遊攻略 ✨</p>
-    </section>
-
-    <section id="guide" class="tab-content px-4 pt-4 space-y-6">
-        <div class="text-center mb-4">
-            <h2 class="text-2xl handwriting text-[#769a9e]">Travel Guide</h2>
-            <p class="text-sm text-gray-500">城市的記憶與故事</p>
-        </div>
-        <div id="guide-container" class="space-y-8"></div>
-    </section>
-    
-    <section id="media" class="tab-content px-4 pt-4">
-        <div class="text-center mb-6">
-            <h2 class="text-2xl handwriting text-[#dca856]">Video Guide</h2>
-            <p class="text-sm text-gray-500">收藏的影片與Reels</p>
-        </div>
-        <div id="media-container" class="space-y-4"></div>
-    </section>
-
-    <section id="lists" class="tab-content px-4 pt-4">
-        <div class="mb-20">
-            <h2 class="text-xl handwriting mb-3 text-[#e6a496]"><i class="fas fa-clipboard-check mr-2"></i>Family Checklist</h2>
-            <div class="bg-white p-4 rounded-[20px] shadow-sm relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-full h-1 bg-[#e6a496]"></div>
-                
-                <div class="family-check-grid mb-3 border-b border-gray-100 pb-2">
-                    <div class="text-xs font-bold text-gray-400 pl-1">物品項目</div>
-                    <div class="family-check-header">爸</div>
-                    <div class="family-check-header">媽</div>
-                    <div class="family-check-header">妹</div>
-                    <div class="family-check-header">哥</div>
-                    <div class="family-check-header">我</div>
-                </div>
-
-                <div id="checklist-container" class="space-y-1"></div>
-            </div>
-        </div>
-    </section>
-
-    <section id="info" class="tab-content px-4 pt-4 space-y-6">
-        <div>
-            <h3 class="text-lg font-bold text-[#769a9e] mb-2"><i class="fas fa-plane-departure mr-2"></i>航班資訊</h3>
-            <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                <div class="flex justify-between items-center border-b border-gray-100 pb-3 mb-3">
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-gray-700">TPE</div>
-                        <div class="text-xs text-gray-400">台北桃園 T2</div>
-                    </div>
-                    <div class="flex-1 px-4 text-center">
-                        <div class="text-[#dca856] text-sm"><i class="fas fa-plane"></i> CI154</div>
-                        <div class="h-[1px] bg-gray-300 w-full my-1"></div>
-                        <div class="text-xs text-gray-400">2h 30m</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-gray-700">NGO</div>
-                        <div class="text-xs text-gray-400">中部國際 T1</div>
-                    </div>
-                </div>
-                <div class="flex justify-between text-sm">
-                    <div><span class="text-gray-400">去程：</span>02/09 07:35</div>
-                    <div><span class="text-gray-400">回程：</span>02/13 12:05 (CI155)</div>
-                </div>
-            </div>
-        </div>
-        <div>
-            <h3 class="text-lg font-bold text-[#e6a496] mb-2"><i class="fas fa-hotel mr-2"></i>住宿資訊</h3>
-            <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 space-y-3">
-                <div class="flex items-start gap-3">
-                    <div class="w-10 h-10 rounded-full bg-[#f9f7f2] flex items-center justify-center text-[#e6a496] shrink-0">
-                        <i class="fas fa-home"></i>
-                    </div>
-                    <div>
-                        <div class="font-bold text-gray-700">牧野東公園旁住宿 (Airbnb)</div>
-                        <div class="text-xs text-gray-500 mb-1">02/09 - 02/12 (3晚)</div>
-                        <a href="https://maps.google.com/?q=牧野東公園" target="_blank" class="text-xs text-[#769a9e] underline">查看地圖</a>
-                    </div>
-                </div>
-                <hr class="border-gray-50">
-                <div class="flex items-start gap-3">
-                    <div class="w-10 h-10 rounded-full bg-[#f9f7f2] flex items-center justify-center text-[#e6a496] shrink-0">
-                        <i class="fas fa-hotel"></i>
-                    </div>
-                    <div>
-                        <div class="font-bold text-gray-700">Nagoya JR Gate Tower Hotel</div>
-                        <div class="text-xs text-gray-500 mb-1">02/12 - 02/13 (1晚)</div>
-                        <a href="https://maps.google.com/?q=Nagoya+JR+Gate+Tower+Hotel" target="_blank" class="text-xs text-[#769a9e] underline">查看地圖</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-            <a href="https://www.jma.go.jp/bosai/forecast/" target="_blank" class="watercolor-card p-4 flex flex-col items-center justify-center gap-2 text-center text-[#5e8b7e]">
-                <i class="fas fa-cloud-sun text-3xl"></i>
-                <span class="font-bold">天氣預報</span>
-                <span class="text-xs text-gray-400">日本氣象廳</span>
-            </a>
-            <a href="https://vjw-lp.digital.go.jp/en/" target="_blank" class="watercolor-card p-4 flex flex-col items-center justify-center gap-2 text-center text-[#e6a496]">
-                <i class="fas fa-qrcode text-3xl"></i>
-                <span class="font-bold">VJW 入境</span>
-                <span class="text-xs text-gray-400">通關必備</span>
-            </a>
-        </div>
-        <div class="bg-red-50 rounded-xl p-4 border border-red-100 mb-20">
-            <h3 class="text-red-800 font-bold mb-2"><i class="fas fa-exclamation-circle mr-2"></i>緊急聯絡</h3>
-            <ul class="text-sm text-red-700 space-y-1">
-                <li class="flex justify-between"><span>報警 (警察局)</span><span class="font-mono font-bold">110</span></li>
-                <li class="flex justify-between"><span>火警 / 救護車</span><span class="font-mono font-bold">119</span></li>
-                <li class="mt-2 text-xs border-t border-red-200 pt-2">
-                    <div class="font-bold">台北駐大阪經濟文化辦事處</div>
-                    <div class="font-mono">06-6227-8623</div>
-                    <div class="text-[10px] opacity-75">緊急：090-8794-4568</div>
-                </li>
-            </ul>
-        </div>
-    </section>
-
-    <nav class="fixed bottom-0 left-0 w-full bg-white/90 backdrop-filter backdrop-blur-lg border-t border-gray-200 pb-safe pt-2 px-2 flex justify-between items-center z-50 h-[80px] rounded-t-[20px] shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
-        <button onclick="switchTab('plan')" class="nav-item active flex flex-col items-center gap-1 text-gray-400 transition-colors flex-1" id="nav-plan">
-            <i class="fas fa-calendar-alt text-lg"></i>
-            <span class="text-[10px]">行程</span>
-        </button>
-        <button onclick="switchTab('guide')" class="nav-item flex flex-col items-center gap-1 text-gray-400 transition-colors flex-1" id="nav-guide">
-            <i class="fas fa-book-open text-lg"></i>
-            <span class="text-[10px]">導覽</span>
-        </button>
-        <button onclick="switchTab('media')" class="nav-item flex flex-col items-center gap-1 text-gray-400 transition-colors flex-1" id="nav-media">
-            <i class="fas fa-play-circle text-lg"></i>
-            <span class="text-[10px]">影音</span>
-        </button>
-        <button onclick="switchTab('lists')" class="nav-item flex flex-col items-center gap-1 text-gray-400 transition-colors flex-1" id="nav-lists">
-            <i class="fas fa-list-check text-lg"></i>
-            <span class="text-[10px]">清單</span>
-        </button>
-        <button onclick="switchTab('info')" class="nav-item flex flex-col items-center gap-1 text-gray-400 transition-colors flex-1" id="nav-info">
-            <i class="fas fa-info-circle text-lg"></i>
-            <span class="text-[10px]">資訊</span>
-        </button>
-    </nav>
-
-    <div id="event-modal" class="modal-overlay" onclick="closeModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <div class="relative h-32 bg-[#769a9e] overflow-hidden rounded-t-[20px]">
-                <div class="absolute top-0 left-0 w-full h-full bg-black/20 z-10"></div>
-                <div class="absolute bottom-4 left-4 z-20 text-white">
-                    <div class="text-xs opacity-80 mb-1" id="modal-time">10:00 - 12:00</div>
-                    <h3 class="text-2xl font-bold" id="modal-title">景點標題</h3>
-                </div>
-                <button onclick="closeModal()" class="absolute top-3 right-3 z-30 w-8 h-8 bg-white/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/50 transition-colors">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="p-5">
-                <div id="modal-analysis" class="mb-4">
-                    <div class="flex flex-wrap gap-2 mb-3" id="modal-tags"></div>
-                    <div class="bg-[#f9f7f2] p-3 rounded-lg text-sm text-gray-600 leading-relaxed border-l-4 border-[#dca856]">
-                        <span class="font-bold block text-[#dca856] mb-1"><i class="fas fa-lightbulb mr-1"></i>導遊筆記：</span>
-                        <span id="modal-desc"></span>
-                    </div>
-                </div>
-                <a id="modal-map-btn" href="#" target="_blank" class="w-full bg-[#5e8b7e] text-white py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-[#4a7266] transition-colors shadow-md">
-                    <i class="fas fa-map-marked-alt"></i> 開啟 Google Maps 導航
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const locationCoords = {
-            "Nagoya": { lat: 35.1815, lon: 136.9066 },
-            "Tokoname": { lat: 34.8893, lon: 136.8346 },
-            "Inuyama": { lat: 35.3883, lon: 136.9396 },
-            "Shirakawa": { lat: 36.2566, lon: 136.9043 },
-            "Takayama": { lat: 36.1408, lon: 137.2523 }
+        // --- Firebase 設定 ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBvvQQ7uAomcA7f_QbU6r8imK5ZnA52SS4",
+            authDomain: "nagoya-9ad6e.firebaseapp.com",
+            projectId: "nagoya-9ad6e",
+            storageBucket: "nagoya-9ad6e.firebasestorage.app",
+            messagingSenderId: "731191881156",
+            appId: "1:731191881156:web:11092aa985c0ddf41a8891"
         };
 
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const { useState, useEffect } = React;
+
+        // --- 資料 ---
         const itineraryData = [
-            {
-                date: "2/9",
-                day: "週一",
-                hotel: "牧野東公園旁住宿",
-                locationKey: "Tokoname",
-                outfit: "洋蔥式穿搭。機場與電車暖氣強，外搭保暖大衣方便穿脫。",
-                events: [
-                    { time: "05:00", end: "05:30", title: "前往桃園機場、報到", icon: "fa-car", important: true },
-                    { time: "05:30", end: "07:35", title: "候機、登機前緩衝", icon: "fa-chair" },
-                    { time: "07:35", end: "11:05", title: "TPE ✈️ NGO (CI154)", icon: "fa-plane", desc: "抵達中部國際機場 T1" },
-                    { time: "11:05", end: "12:00", title: "入境、拿行李", icon: "fa-passport", guide: "入境後記得先開通 eSIM。名鐵電車車票可於自動售票機購買。" },
-                    { time: "12:00", end: "12:20", title: "中部國際機場 → 常滑", icon: "fa-train", important: true, guide: "搭乘名鐵常滑線，僅需2站。" },
-                    { 
-                        time: "12:20", end: "14:00", title: "常滑老街", icon: "fa-cat", location: "常滑老街",
-                        guide: "陶瓷之都。看招財貓、吃地瓜。沿著「陶器散步道」走，必拍巨大招財貓 Tokonyan。",
-                        tags: [{text: "必吃：烤地瓜", type: "eat"}, {text: "必拍：招財貓", type: "go"}]
-                    },
-                    { time: "14:00", end: "14:40", title: "常滑 → 名古屋站", icon: "fa-train", important: true },
-                    { time: "14:40", end: "15:10", title: "名古屋站 → 住宿", icon: "fa-suitcase", guide: "前往牧野東公園旁住宿 Check-in / 寄放行李" },
-                    { time: "15:10", end: "15:40", title: "住宿 → 熱田神宮", icon: "fa-train" },
-                    { 
-                        time: "15:40", end: "17:30", title: "熱田神宮", icon: "fa-torii-gate", location: "熱田神宮",
-                        guide: "參拜、散步，逛逛商店街小吃。日本三大神宮之一。",
-                        tags: [{text: "必吃：宮きしめん(寬麵)", type: "eat"}, {text: "必看：信長牆", type: "go"}]
-                    },
-                    { time: "17:30", end: "18:00", title: "熱田神宮 → 蓬萊軒", icon: "fa-walking", desc: "前往松阪屋店" },
-                    { 
-                        time: "18:00", end: "21:30", title: "蓬萊軒 鰻魚飯", icon: "fa-utensils", location: "蓬萊軒 松坂屋店",
-                        guide: "名古屋最知名的鰻魚飯三吃。排隊+用餐，若等待時間長可先去抽整理券再去逛街。",
-                        tags: [{text: "必吃：鰻魚飯三吃", type: "eat"}, {text: "預約：現場抽券", type: "code"}]
-                    },
-                    { time: "21:30", end: "22:00", title: "松阪屋 → 住宿", icon: "fa-bed", desc: "★回去前要先買明天的早餐！" }
-                ]
-            },
-            {
-                date: "2/10",
-                day: "週二",
-                hotel: "牧野東公園旁住宿",
-                locationKey: "Inuyama",
-                outfit: "★和服日：內穿V領或低領發熱衣（勿露領口），貼暖暖包。",
-                events: [
-                    { time: "07:10", end: "07:30", title: "民宿 → 早餐店", icon: "fa-walking" },
-                    { 
-                        time: "08:00", end: "08:45", title: "Tsubame Bread & Milk", icon: "fa-bread-slice", location: "Tsubame Bread & Milk",
-                        guide: "網美風早餐店，招牌是鮮奶油吐司與霜淇淋。",
-                        tags: [{text: "必吃：厚片吐司", type: "eat"}]
-                    },
-                    { time: "08:45", end: "09:00", title: "返回民宿", icon: "fa-walking" },
-                    { time: "09:00", end: "09:30", title: "化妝、準備", icon: "fa-star" },
-                    { 
-                        time: "09:45", end: "12:30", title: "11PhotoStudio 和服換裝", icon: "fa-user-tie", location: "11PhotoStudio 名古屋",
-                        guide: "換裝後前往犬山城拍照。記得選比較鮮豔的顏色，在犬山城拍照會比較突出。",
-                        tags: [{text: "預約代號：CHECK_MAIL", type: "code"}]
-                    },
-                    { 
-                        time: "12:30", end: "16:00", title: "犬山城 ＆ 城下町", icon: "fa-chess-rook", location: "犬山城",
-                        guide: "犬山城＋城下町、三光稻荷神社(洗錢)。可以準備一些台幣或澳幣來洗。",
-                        tags: [{text: "必吃：飛驒牛握壽司", type: "eat"}, {text: "必做：洗錢", type: "go"}]
-                    },
-                    { time: "16:00", end: "17:30", title: "回市區、歸還和服", icon: "fa-bus", important: true },
-                    { time: "17:30", end: "18:00", title: "名鐵｜11PhotoStudio → 榮", icon: "fa-train" },
-                    { time: "18:00", end: "18:30", title: "地鐵｜名古屋 → 榮", icon: "fa-subway" },
-                    { 
-                        time: "18:30", end: "20:00", title: "榮商圈晚餐", icon: "fa-utensils", location: "榮商圈",
-                        guide: "晚餐選擇多，從居酒屋到百貨美食街都有。可順道去唐吉訶德採買。",
-                        tags: [{text: "必逛：唐吉訶德", type: "buy"}]
-                    },
-                    { 
-                        time: "20:00", end: "21:00", title: "中部電力塔 夜景", icon: "fa-tower-observation", location: "中部電力 MIRAI TOWER",
-                        guide: "中部電力 MIRAI TOWER 夜景＋久屋大通散步。",
-                        tags: [{text: "必拍：水之宇宙船", type: "go"}]
-                    },
-                    { time: "21:00", end: "22:00", title: "返回住宿休息", icon: "fa-bed" }
-                ]
-            },
-            {
-                date: "2/11",
-                day: "週三",
-                hotel: "牧野東公園旁住宿",
-                locationKey: "Shirakawa",
-                outfit: "⚠️ 極寒注意！羽絨外套、毛帽、手套、防滑防水鞋。",
-                events: [
-                    { time: "07:30", end: "08:00", title: "起床、早餐、準備", icon: "fa-coffee" },
-                    { time: "08:00", end: "10:10", title: "住宿 → 白川鄉合掌村", icon: "fa-bus", important: true, guide: "長途巴士，建議先上廁所。" },
-                    { 
-                        time: "10:10", end: "11:50", title: "白川鄉合掌村", icon: "fa-snowflake", location: "白川鄉合掌村",
-                        guide: "童話世界。⚠️ 11:40要準備回停車場集合。",
-                        tags: [{text: "必吃：五平餅", type: "eat"}, {text: "必吃：飛驒牛串燒", type: "eat"}]
-                    },
-                    { time: "11:50", end: "13:00", title: "白川鄉 → 飛驒高山", icon: "fa-bus", important: true },
-                    { 
-                        time: "13:00", end: "14:30", title: "午餐：味之与平", icon: "fa-utensils", location: "味之与平",
-                        guide: "不用吃太飽，留點胃逛老街吃小吃。",
-                        tags: [{text: "必吃：壽喜燒", type: "eat"}]
-                    },
-                    { 
-                        time: "14:30", end: "15:40", title: "高山飛驒老街", icon: "fa-store", location: "飛驒高山老街",
-                        guide: "三町通古色古香。味噌跟清酒是名產。",
-                        tags: [{text: "必買：味噌", type: "buy"}, {text: "必吃：牛肉包", type: "eat"}]
-                    },
-                    { time: "15:40", end: "18:00", title: "飛驒高山 → 住宿", icon: "fa-bus", important: true },
-                    { time: "18:00", end: "18:20", title: "住宿 → 海老どて食堂", icon: "fa-walking" },
-                    { 
-                        time: "18:30", end: "20:00", title: "晚餐：海老どて食堂", icon: "fa-utensils", location: "海老どて食堂 エスカ店",
-                        guide: "名古屋地下街 (如果不想吃可以選別的)。擁有全日本最大的炸蝦（35公分）！",
-                        tags: [{text: "必吃：特大炸蝦", type: "eat"}]
-                    },
-                    { time: "20:00", end: "20:20", title: "散步回住宿", icon: "fa-bed", desc: "有力氣的話可以去永旺 (AEON)" }
-                ]
-            },
-            {
-                date: "2/12",
-                day: "週四",
-                hotel: "JR Gate Tower Hotel",
-                locationKey: "Nagoya",
-                outfit: "市區逛街日。輕便鞋。室內暖氣足，大衣可寄放。",
-                events: [
-                    { time: "08:00", end: "08:30", title: "早餐、整理行李", icon: "fa-suitcase" },
-                    { time: "08:30", end: "09:00", title: "Airbnb 退房", icon: "fa-door-open" },
-                    { time: "09:00", end: "09:20", title: "移動至 JR Gate Tower 飯店", icon: "fa-luggage-cart", location: "Nagoya JR Gate Tower Hotel", guide: "寄放行李。Gate Tower 地點極佳，寄放完直接搭車。" },
-                    { 
-                        time: "09:45", end: "11:15", title: "名古屋城 (本丸御殿)", icon: "fa-archway", location: "名古屋城",
-                        guide: "必看金碧輝煌的「本丸御殿」。天守閣目前整修中無法進入，但外觀仍可拍照。",
-                        tags: [{text: "必看：本丸御殿", type: "go"}]
-                    },
-                    { time: "11:45", end: "12:45", title: "Gate Tower/高島屋 午餐", icon: "fa-utensils" },
-                    { 
-                        time: "13:00", end: "15:00", title: "Gate Tower Mall 逛街", icon: "fa-shopping-bag",
-                        guide: "Bic Camera、Uniqlo、GU、迪士尼商店一次買齊。高島屋樓下有超多伴手禮。",
-                        tags: [{text: "必買：蝦仙貝", type: "buy"}, {text: "必買：小倉吐司夾心", type: "buy"}]
-                    },
-                    { time: "15:00", end: "16:00", title: "飯店入住／休息", icon: "fa-bed" },
-                    { time: "17:30", end: "20:00", title: "名古屋站周邊晚餐", icon: "fa-utensils" }
-                ]
-            },
-            {
-                date: "2/13",
-                day: "週五",
-                hotel: "Home Sweet Home",
-                locationKey: "Nagoya",
-                outfit: "返台舒適穿搭。寬鬆長褲或長裙。",
-                events: [
-                    { time: "07:45", end: "08:00", title: "起床、整理行李", icon: "fa-suitcase" },
-                    { time: "08:00", end: "09:00", title: "名鐵 μ-SKY → 機場", icon: "fa-train", important: true, desc: "名古屋 → 中部國際機場" },
-                    { 
-                        time: "09:00", end: "12:05", title: "機場報到、出境手續", icon: "fa-passport",
-                        guide: "名古屋機場4樓有「藍天城」很多餐廳跟商店，如果太早到可以去逛。",
-                        tags: [{text: "必買：免稅甜點", type: "buy"}]
-                    },
-                    { time: "12:05", end: "14:40", title: "NGO ✈️ TPE (CI155)", icon: "fa-plane-departure", desc: "中部國際機場 → 桃園機場" }
-                ]
-            }
+            { date: "2/9 (週一)", events: [
+                { time: "07:35", title: "TPE ✈️ NGO", icon: "fa-plane", type: "transport", important: true },
+                { time: "12:20", title: "常滑老街", icon: "fa-cat", type: "spot", guide: "必拍巨大招財貓 Tokonyan，去陶器散步道走走。", tags: ["eat", "go"] },
+                { time: "14:00", title: "移動至市區", icon: "fa-train", type: "transport" },
+                { time: "18:00", title: "蓬萊軒 鰻魚飯", icon: "fa-utensils", type: "food", guide: "記得先抽整理券！", tags: ["eat", "code"] },
+            ]},
+            { date: "2/10 (週二)", events: [
+                { time: "09:45", title: "和服換裝", icon: "fa-user-tie", type: "spot", guide: "預約代號 CHECK_MAIL", tags: ["code"] },
+                { time: "12:30", title: "犬山城", icon: "fa-chess-rook", type: "spot", guide: "國寶五城之一，爬樓梯很陡要注意。", tags: ["go"] },
+                { time: "18:30", title: "榮商圈晚餐", icon: "fa-utensils", type: "food", guide: "隨意逛逛，推薦手羽先。", tags: ["eat"] },
+            ]},
+            { date: "2/11 (週三)", events: [
+                { time: "08:00", title: "前往白川鄉", icon: "fa-bus", type: "transport", important: true },
+                { time: "10:10", title: "白川鄉合掌村", icon: "fa-snowflake", type: "spot", guide: "童話世界，記得去展望台。", tags: ["go", "eat"] },
+                { time: "14:30", title: "飛驒高山老街", icon: "fa-store", type: "spot", guide: "必吃飛驒牛握壽司。", tags: ["eat"] },
+            ]},
+            { date: "2/12 (週四)", events: [
+                { time: "09:45", title: "名古屋城", icon: "fa-archway", type: "spot", guide: "本丸御殿必看，金碧輝煌。", tags: ["go"] },
+                { time: "13:00", title: "Gate Tower 逛街", icon: "fa-shopping-bag", type: "spot", guide: "最後採買機會！Bic Camera, Uniqlo。", tags: ["buy"] },
+            ]},
+            { date: "2/13 (週五)", events: [
+                { time: "09:00", title: "前往機場", icon: "fa-train", type: "transport" },
+                { time: "12:05", title: "NGO ✈️ TPE", icon: "fa-plane-departure", type: "transport", important: true },
+            ]}
         ];
 
-        // 更新的導覽資料
-        const guideData = [
-            {
-                category: "古蹟景點導覽",
-                color: "text-[#5e8b7e]",
-                items: [
-                    {
-                        title: "常滑老街",
-                        img: "https://i0.wp.com/listentolu.com/wp-content/uploads/%E5%B8%B8%E6%BB%91%E5%B0%81%E9%9D%A2.jpg?fit=2400%2C1200&ssl=1",
-                        desc: "距離機場僅20分鐘的陶瓷之都。漫步在「陶器散步道」，欣賞紅磚煙囪與黑色板壁工廠，最著名的是巨大的「守護貓Tokonyan」招財貓。",
-                    },
-                    {
-                        title: "熱田神宮",
-                        img: "https://static.gltjp.com/glt/data/article/21000/20401/20241119_023936_de5ef996_w1920.webp",
-                        desc: "日本三大神宮之一，供奉著草薙劍。走在充滿靈氣的森林參道，別忘了在境內的「宮きしめん」享用名物寬麵，並參觀據說是織田信長出征前祈願勝利的「信長牆」。",
-                    },
-                    {
-                        title: "犬山城",
-                        img: "https://d1grca2t3zpuug.cloudfront.net/2025/12/2025inuyamajo16-870x500-1765244239.webp",
-                        desc: "日本現存最古老的木造天守，國寶五城之一。登上天守閣頂層，可以360度俯瞰木曾川的絕美景色。城下町保有江戶時代風情，非常適合穿著和服散步。",
-                    },
-                    {
-                        title: "三光稻荷神社",
-                        img: "https://bjsmile.tw/wp-content/uploads/2024/12/page11.jpg",
-                        desc: "位於犬山城腳下，以粉紅色愛心繪馬聞名，是求良緣的聖地。神社內還有「錢洗稻荷」，據說用這裡的神水洗過的錢會加倍回來，記得準備外幣或大鈔來洗錢！",
-                    },
-                    {
-                        title: "中部電力 MIRAI TOWER",
-                        img: "https://bobbyfun.tw/wp-content/uploads/2025/01/20250108134852_0_09299e.jpg",
-                        desc: "舊稱名古屋電視塔，是日本第一座集約電波塔。夜晚點燈後與前方的「綠洲21」水之宇宙船相互輝映，是名古屋最經典的夜景地標。",
-                    },
-                    {
-                        title: "白川鄉合掌村",
-                        img: "https://d1grca2t3zpuug.cloudfront.net/2024/09/66e26c5a140b9-870x500.webp",
-                        desc: "世界文化遺產，如同童話般的村落。冬季時白雪覆蓋在「合掌造」茅草屋頂上，景色夢幻。村內的和田家、神田家可入內參觀，感受先人的生活智慧。",
-                    },
-                    {
-                        title: "飛驒高山老街",
-                        img: "https://twoslowbyron.com/wp-content/uploads/2025/01/DSC07506-12.jpg",
-                        desc: "有「飛驒小京都」之稱。三町通保留了黑色木造的古建築，釀酒廠、味噌店林立。必吃入口即化的飛驒牛握壽司以及熱呼呼的牛肉包。",
-                    },
-                    {
-                        title: "名古屋城",
-                        img: "https://res.klook.com/images/w_1200,h_630,c_fill,q_65/activities/mv6lrp0mrcl0chali7mm/名古屋城.jpg",
-                        desc: "德川家康的居城，屋頂上的金鯱閃耀奪目。修復完成的「本丸御殿」內部金碧輝煌，障壁畫精美絕倫，展現了武家文化的奢華與威嚴。",
-                    }
-                ]
-            },
-            {
-                category: "逛街攻略",
-                color: "text-[#e6a496]",
-                items: [
-                    {
-                        title: "JR Gate Tower / 高島屋",
-                        img: "https://gogojp.tw/wp-content/uploads/20190321215732_73.jpg",
-                        desc: "與名古屋車站直結，擁有Bic Camera、Uniqlo、GU以及全日本最大的迪士尼商店。高層樓還有景觀星巴克與各式餐廳，是離開前最後衝刺的首選。",
-                    },
-                    {
-                        title: "榮商圈 / 久屋大通",
-                        img: "https://wp-odai.wamazing.com/media/wp-content/uploads/sites/2/2025/04/nagoyashopping_pixta_99848654_M.jpg.webp",
-                        desc: "名古屋最繁華的區域。有許多百貨公司如松坂屋、PARCO，以及地標 RAYARD Hisaya-odori Park，公園兩側充滿文青店鋪，適合悠閒散步。",
-                    }
-                ]
-            },
-            {
-                category: "美食攻略",
-                color: "text-[#dca856]",
-                items: [
-                    {
-                        title: "鰻魚飯三吃 (Hitsumabushi)",
-                        img: "https://sslife.tw/wp-content/uploads/2025/06/07-4.jpg",
-                        desc: "名古屋必吃靈魂美食。第一吃品嚐原味，第二吃加入佐料（海苔、蔥花、芥末），第三吃加入高湯做成茶泡飯。推薦名店：蓬萊軒。",
-                    },
-                    {
-                        title: "炸蝦 / 炸豬排",
-                        img: "https://margaret.tw/wp-content/uploads/pixnet/35663524860_e366662641_z.jpg",
-                        desc: "名古屋人超愛炸物與味噌。巨大的炸蝦（海老フライ）和淋上濃厚紅味噌醬的味噌豬排（矢場豚）是經典代表，口感酥脆，醬汁濃郁。",
-                    },
-                    {
-                        title: "手羽先",
-                        img: "https://alinalife.tw/wp-content/uploads/2024/08/20240818202630_0_d3bf9a.jpg",
-                        desc: "名古屋人招牌手羽先炸雞翅，是日本人的宵夜下酒菜。再配上各種開胃菜、沙拉，爽口解嘴饞。",
-                    },
-                    {
-                        title: "名古屋早餐文化",
-                        img: "https://d1grca2t3zpuug.cloudfront.net/2024/12/675b8d57274ff-860x500.webp",
-                        desc: "「點飲料送早餐」是這裡的特有文化。通常點一杯咖啡就會附贈烤吐司與水煮蛋，是開啟名古屋早晨最道地的方式。",
-                    }
-                ]
-            }
-        ];
-        
-        const mediaData = [
-            {
-                type: "yt",
-                title: "名古屋交通攻略｜名鐵 μ-SKY",
-                desc: "機場到市區只要28分鐘！購票教學與搭乘實測。",
-                url: "https://www.youtube.com/results?search_query=名古屋+機場+名鐵+攻略"
-            },
-            {
-                type: "ig",
-                title: "犬山城和服體驗 Reels",
-                desc: "11PhotoStudio 換裝過程，還有超好拍的城下町散步景點！",
-                url: "https://www.instagram.com/explore/tags/犬山城和服/"
-            },
-            {
-                type: "yt",
-                title: "蓬萊軒鰻魚飯 排隊攻略",
-                desc: "不想排隊排到天荒地老？必看的抽整理券技巧。",
-                url: "https://www.youtube.com/results?search_query=蓬萊軒+鰻魚飯+攻略"
-            },
-            {
-                type: "ig",
-                title: "白川鄉合掌村 絕美拍照點",
-                desc: "雪地裡的童話世界，這幾個角度拍起來最夢幻！",
-                url: "https://www.instagram.com/explore/tags/白川鄉合掌村/"
-            },
-            {
-                type: "yt",
-                title: "名古屋必買伴手禮 Top 10",
-                desc: "蝦仙貝、小倉紅豆吐司夾心餅...照著買不踩雷！",
-                url: "https://www.youtube.com/results?search_query=名古屋+伴手禮"
-            }
+        const guideStories = [
+            { title: "犬山城的故事", desc: "這座城其實是『別人生』的？它是全日本最古老的木造天守，能在戰火中倖存是奇蹟。據說城主成瀨家一直守護它到2004年才交給財團法人管理，是真正『私人擁有』的國寶。", img: "https://d1grca2t3zpuug.cloudfront.net/2025/12/2025inuyamajo16-870x500-1765244239.webp" },
+            { title: "鰻魚飯三吃的奧義", desc: "為什麼要分四份吃？其實源自明治時代，為了不浪費送外賣時碎掉的鰻魚。第一吃原味，第二吃加佐料（蔥、芥末），第三吃加高湯（茶泡飯），第四吃...就隨你開心！", img: "https://sslife.tw/wp-content/uploads/2025/06/07-4.jpg" },
+            { title: "結（Yui）的精神", desc: "白川鄉合掌造屋頂每30年要換一次，需要全村人同心協力。這種互助制度稱為『結』。沒有這種精神，人們無法在豪雪地帶生存下來。", img: "https://d1grca2t3zpuug.cloudfront.net/2024/09/66e26c5a140b9-870x500.webp" },
         ];
 
-        const defaultPackingList = [
-            "護照 (有效期6個月以上)", "eSIM / 漫遊開通", "日幣 (現金)", "Visit Japan Web截圖", 
-            "行動電源 & 充電線", "常備藥品 (胃藥/止痛)", "牙刷牙膏", "信用卡 (海外回饋高)", 
-            "保暖衣物", "舒適好走的鞋", "暖暖包", "口罩", "購物袋 (環保袋)"
-        ];
-        
-        const familyMembers = ["爸", "媽", "妹", "哥", "我"];
-
-        // --- 邏輯區 ---
-        document.addEventListener('DOMContentLoaded', () => {
-            renderDateSelector();
-            renderItinerary(0);
-            renderGuide();
-            renderMedia(); 
-            renderChecklist();
-        });
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            document.getElementById('nav-' + tabId).classList.add('active');
-            window.scrollTo(0,0);
-        }
-
-        function renderDateSelector() {
-            const container = document.getElementById('date-scroll');
-            container.innerHTML = itineraryData.map((day, index) => `
-                <button onclick="renderItinerary(${index})" id="date-btn-${index}" 
-                    class="date-btn flex-shrink-0 px-4 py-2 rounded-2xl border border-gray-100 shadow-sm bg-white min-w-[70px] text-center transition-all ${index === 0 ? 'bg-[#5e8b7e] text-white ring-2 ring-[#5e8b7e]/50' : 'text-gray-500'}">
-                    <div class="text-xs font-bold mb-1">${day.date}</div>
-                    <div class="text-[10px] opacity-80">${day.day}</div>
-                </button>
-            `).join('');
-        }
-
-        async function fetchWeather(lat, lon, dateStr) {
-            const container = document.getElementById('weather-card-container');
-            container.innerHTML = `
-                <div class="watercolor-card p-4 bg-gradient-to-br from-[#fdfbf7] to-[#fff] border-l-4 border-[#769a9e] mb-4 mx-2 animate-pulse">
-                    <div class="flex items-center gap-4">
-                        <div class="text-center w-16 shrink-0 text-gray-300">
-                            <i class="fas fa-circle-notch fa-spin text-2xl"></i>
-                        </div>
-                        <div class="flex-1 pl-4">
-                            <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                            <div class="h-3 bg-gray-100 rounded w-1/2"></div>
-                        </div>
+        // --- 組件 ---
+        const EventCard = ({ event }) => {
+            const isTransport = event.type === 'transport';
+            const tagColors = { eat: 'bg-orange-500', go: 'bg-green-600', buy: 'bg-red-500', code: 'bg-blue-500' };
+            
+            return (
+                <div className="relative pl-8 pb-1 group">
+                    <div className="absolute left-[13px] top-0 bottom-0 w-0.5 bg-gray-200"></div>
+                    <div className="absolute left-0 top-1 w-8 flex justify-center z-10">
+                        <div className={`w-3 h-3 rounded-full bg-white border-2 ${event.important ? 'border-accent' : 'border-primary'}`}></div>
                     </div>
-                </div>`;
-
-            const year = "2026";
-            const [month, day] = dateStr.split('/');
-            const formattedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-            
-            try {
-                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=Asia%2FTokyo&start_date=${formattedDate}&end_date=${formattedDate}`;
-                
-                const response = await fetch(url);
-                const data = await response.json();
-
-                if (data.daily && data.daily.time.length > 0) {
-                    const min = Math.round(data.daily.temperature_2m_min[0]);
-                    const max = Math.round(data.daily.temperature_2m_max[0]);
-                    const code = data.daily.weathercode[0];
-                    let icon = "fa-sun";
-                    let condition = "晴朗";
-                    
-                    if (code > 3) { icon = "fa-cloud"; condition = "多雲"; }
-                    if (code > 45) { icon = "fa-smog"; condition = "霧"; }
-                    if (code > 50) { icon = "fa-cloud-rain"; condition = "有雨"; }
-                    if (code > 70) { icon = "fa-snowflake"; condition = "有雪"; }
-
-                    return { min, max, icon, condition, isForecast: true };
-                }
-            } catch (e) {
-                console.error("Weather fetch failed", e);
-            }
-            return { min: 2, max: 9, icon: "fa-cloud-sun", condition: "平均氣候", isForecast: false };
-        }
-
-        async function renderItinerary(index) {
-            document.querySelectorAll('.date-btn').forEach(btn => {
-                btn.classList.remove('bg-[#5e8b7e]', 'text-white', 'ring-2');
-                btn.classList.add('text-gray-500', 'bg-white');
-            });
-            const activeBtn = document.getElementById(`date-btn-${index}`);
-            activeBtn.classList.remove('text-gray-500', 'bg-white');
-            activeBtn.classList.add('bg-[#5e8b7e]', 'text-white', 'ring-2', 'ring-[#5e8b7e]/50');
-
-            const dayData = itineraryData[index];
-            
-            const locKey = dayData.locationKey || "Nagoya";
-            const coords = locationCoords[locKey];
-            
-            const weather = await fetchWeather(coords.lat, coords.lon, dayData.date);
-
-            const weatherContainer = document.getElementById('weather-card-container');
-            const weatherBadge = weather.isForecast ? '<span class="bg-blue-100 text-blue-600 text-[10px] px-1 rounded ml-1">預報</span>' : '<span class="bg-gray-100 text-gray-500 text-[10px] px-1 rounded ml-1">歷史平均</span>';
-            
-            const weatherHtml = `
-                <div class="watercolor-card p-4 bg-gradient-to-br from-[#fdfbf7] to-[#fff] border-l-4 border-[#769a9e] mb-4 mx-2">
-                    <div class="flex items-center gap-4">
-                        <div class="text-center w-16 shrink-0 text-[#769a9e]">
-                            <i class="fas ${weather.icon} text-2xl mb-1"></i>
-                            <div class="font-bold text-sm text-nowrap">${weather.min}°-${weather.max}°</div>
+                    <div className={`p-4 mb-4 rounded-xl shadow-sm border border-gray-100 ${event.important ? 'bg-[#fffcf5] border-l-4 border-l-accent' : 'bg-white'}`}>
+                        <div className="flex justify-between items-center mb-1">
+                            <span className={`font-bold text-sm ${event.important ? 'text-accent' : 'text-primary'}`}>{event.time}</span>
+                            <i className={`fas ${event.icon} text-gray-300`}></i>
                         </div>
-                        <div class="flex-1 border-l border-gray-100 pl-4">
-                            <div class="flex items-center mb-1">
-                                <span class="text-xs text-gray-500 tracking-wider font-bold mr-1">${locKey === 'Shirakawa' ? '白川鄉' : (locKey === 'Takayama' ? '高山' : (locKey === 'Tokoname' ? '常滑' : '名古屋'))}</span>
-                                <span class="text-xs text-gray-400">${weather.condition}</span>
-                                ${weatherBadge}
+                        <h3 className="font-bold text-gray-800 text-lg">{event.title}</h3>
+                        {!isTransport && event.guide && (
+                            <div className="mt-2 pt-2 border-t border-gray-100">
+                                <p className="text-xs text-gray-500 mb-2">{event.guide}</p>
+                                <div className="flex gap-1">{event.tags?.map((t) => <span key={t} className={`${tagColors[t]} text-white text-[10px] px-2 py-0.5 rounded font-bold uppercase`}>{t}</span>)}</div>
                             </div>
-                            <div class="text-sm text-gray-600 font-medium leading-relaxed">
-                                <i class="fas fa-tshirt text-[#e6a496] mr-1"></i>
-                                ${dayData.outfit}
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const ExpenseTab = () => {
+            const [expenses, setExpenses] = useState([]);
+            const [rate, setRate] = useState(0.22);
+            const [showModal, setShowModal] = useState(false);
+            const [amount, setAmount] = useState("");
+            const [currency, setCurrency] = useState('JPY');
+            const [cat, setCat] = useState("飲食");
+            const [payer, setPayer] = useState("我");
+
+            useEffect(() => {
+                // 抓取匯率
+                fetch('https://api.frankfurter.app/latest?from=JPY&to=TWD')
+                    .then(res => res.json())
+                    .then(data => setRate(data.rates.TWD))
+                    .catch(() => setRate(0.22));
+
+                // 監聽 Firebase
+                try {
+                    const q = query(collection(db, "expenses"), orderBy("timestamp", "desc"));
+                    const unsub = onSnapshot(q, (snapshot) => {
+                        setExpenses(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+                    });
+                    return () => unsub();
+                } catch(e) {
+                    console.error("Firebase Error", e);
+                }
+            }, []);
+
+            const handleAdd = async () => {
+                if (!amount) return;
+                try {
+                    await addDoc(collection(db, "expenses"), { 
+                        amount: parseFloat(amount), 
+                        currency, 
+                        category: cat, 
+                        payer, 
+                        note: "", 
+                        timestamp: Timestamp.now() 
+                    });
+                    setShowModal(false); 
+                    setAmount("");
+                } catch(e) {
+                    alert("儲存失敗，請確認 Firebase 規則設定");
+                }
+            };
+
+            const totalTWD = expenses.reduce((acc, curr) => acc + (curr.currency === 'JPY' ? curr.amount * rate : curr.amount), 0);
+            const totalJPY = expenses.filter(e => e.currency === 'JPY').reduce((acc, c) => acc + c.amount, 0);
+
+            return (
+                <div className="pb-24 px-4 pt-4 space-y-4">
+                    <div className="bg-gradient-to-br from-primary to-[#5e8b7e] rounded-2xl p-5 text-white shadow-lg">
+                        <div className="text-xs opacity-80 mb-1">總支出 (Total Estimate)</div>
+                        <div className="text-3xl font-bold mb-4">NT$ {Math.round(totalTWD).toLocaleString()}</div>
+                        <div className="flex gap-4 border-t border-white/20 pt-3">
+                            <div><div className="text-[10px] opacity-70">日幣小計</div><div className="font-mono text-lg">¥{totalJPY.toLocaleString()}</div></div>
+                            <div><div className="text-[10px] opacity-70">人均 (5人)</div><div className="font-mono text-lg">NT${Math.round(totalTWD/5).toLocaleString()}</div></div>
+                        </div>
+                        <div className="text-[10px] text-right mt-2 opacity-60">匯率: {rate}</div>
+                    </div>
+
+                    <button onClick={() => setShowModal(true)} className="w-full bg-accent text-white py-3 rounded-xl font-bold shadow-md active:scale-95 transition-transform"><i className="fas fa-plus mr-2"></i> 記一筆</button>
+
+                    <div className="space-y-2">
+                        {expenses.map(exp => (
+                            <div key={exp.id} className="bg-white p-3 rounded-xl shadow-sm flex justify-between items-center">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 text-xs">{exp.category === '飲食' ? '🍽️' : exp.category === '交通' ? '🚆' : '🛍️'}</div>
+                                    <div><div className="font-bold text-gray-700 text-sm">{exp.category}</div><div className="text-[10px] text-gray-400">{exp.payer} 付款</div></div>
+                                </div>
+                                <div className="text-right">
+                                    <div className="font-bold text-gray-800">{exp.currency === 'JPY' ? '¥' : 'NT$'}{exp.amount.toLocaleString()}</div>
+                                    {exp.currency === 'JPY' && <div className="text-[10px] text-gray-400">≈ NT${Math.round(exp.amount * rate)}</div>}
+                                </div>
                             </div>
+                        ))}
+                    </div>
+
+                    {showModal && (
+                        <div className="fixed inset-0 bg-paper z-50 flex flex-col pb-safe animate-slideUp">
+                            <div className="p-4 flex justify-between items-center border-b border-gray-200">
+                                <button onClick={() => setShowModal(false)}><i className="fas fa-times text-xl text-gray-400"></i></button><div className="font-bold">新增支出</div><button onClick={handleAdd} className="text-primary font-bold">儲存</button>
+                            </div>
+                            <div className="flex-1 flex flex-col items-center justify-center">
+                                <div className="flex items-end gap-2 mb-2">
+                                    <button onClick={() => setCurrency(c => c === 'JPY' ? 'TWD' : 'JPY')} className="text-2xl text-gray-400 font-bold border-b border-dashed border-gray-300">{currency}</button>
+                                    <span className="text-6xl text-gray-800 font-mono font-bold">{amount || '0'}</span>
+                                </div>
+                                {currency === 'JPY' && <div className="text-gray-400 text-sm">≈ TWD {Math.round((parseFloat(amount)||0) * rate)}</div>}
+                            </div>
+                            <div className="px-4 mb-4">
+                                <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                                    {['飲食', '交通', '購物', '住宿', '票券'].map(c => <button key={c} onClick={() => setCat(c)} className={`px-4 py-2 rounded-full border text-sm whitespace-nowrap ${cat === c ? 'bg-primary text-white border-primary' : 'bg-white border-gray-200 text-gray-600'}`}>{c}</button>)}
+                                </div>
+                                <div className="bg-white p-3 rounded-xl mt-2 flex justify-between items-center shadow-sm">
+                                    <span className="text-sm text-gray-500">付款人</span>
+                                    <div className="flex gap-2">{['我', '爸', '媽'].map(p => <button key={p} onClick={() => setPayer(p)} className={`text-xs px-3 py-1 rounded-full ${payer === p ? 'bg-secondary text-white' : 'bg-gray-100'}`}>{p}</button>)}</div>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-3 gap-1 bg-gray-100 p-1">
+                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, '.', 0, 'DEL'].map((key) => (
+                                    <button key={key} onClick={() => { if (key === 'DEL') setAmount(p => p.slice(0, -1)); else setAmount(p => p + key); }} className="bg-white p-6 text-xl font-bold active:bg-gray-200 rounded-sm keypad-btn">{key === 'DEL' ? <i className="fas fa-backspace"></i> : key}</button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const BookingsTab = () => (
+            <div className="px-4 pt-4 space-y-6 pb-24">
+                <div>
+                    <h3 className="text-primary font-bold mb-3"><i className="fas fa-plane mr-2"></i>Boarding Pass</h3>
+                    <div className="bg-white rounded-2xl shadow-md overflow-hidden relative">
+                        <div className="ticket-notch -left-3"></div><div className="ticket-notch -right-3"></div>
+                        <div className="p-5 pb-8 border-b-2 border-dashed border-gray-100">
+                            <div className="flex justify-between items-end mb-4"><div className="text-3xl font-bold text-gray-800">TPE</div><i className="fas fa-plane text-gray-300 transform rotate-45 mb-2"></i><div className="text-3xl font-bold text-gray-800">NGO</div></div>
+                            <div className="flex justify-between text-xs text-gray-400 font-mono"><div>07:35</div><div className="text-accent font-bold">2h 30m</div><div>11:05</div></div>
+                        </div>
+                        <div className="bg-gray-50 p-4 flex justify-between items-center text-sm">
+                            <div><span className="text-gray-400 text-[10px] block">FLIGHT</span><span className="font-bold text-primary">CI154</span></div>
+                            <div><span className="text-gray-400 text-[10px] block">DATE</span><span className="font-bold text-gray-700">FEB 09</span></div>
                         </div>
                     </div>
                 </div>
-            `;
-            weatherContainer.innerHTML = weatherHtml;
-
-            const container = document.getElementById('itinerary-container');
-            let html = `<div class="pl-8 mb-6"><div class="inline-block bg-[#e08e79]/10 text-[#e08e79] px-3 py-1 rounded-full text-xs font-bold border border-[#e08e79]/20"><i class="fas fa-bed mr-1"></i> ${dayData.hotel}</div></div>`;
-
-            html += dayData.events.map((event, evtIndex) => {
-                const isImportant = event.important ? 'border-l-4 border-[#dca856] bg-[#fffcf5]' : 'border-l-4 border-transparent bg-white';
-                const timeColor = event.important ? 'text-[#dca856]' : 'text-[#769a9e]';
-                
-                return `
-                <div class="relative pl-8 pb-1 group" onclick="openEventModal(${index}, ${evtIndex})">
-                    <div class="absolute left-0 top-1 w-8 flex flex-col items-center z-10">
-                        <div class="w-3 h-3 rounded-full bg-white border-2 border-[#5e8b7e] group-hover:scale-125 transition-transform"></div>
+                <div>
+                    <h3 className="text-secondary font-bold mb-3"><i className="fas fa-hotel mr-2"></i>Hotel</h3>
+                    <div className="bg-white rounded-xl shadow-sm overflow-hidden flex gap-3 p-3">
+                        <img src="https://a0.muscache.com/im/pictures/miso/Hosting-53282766/original/94c5e7b5-22d0-4054-954f-6623097c2725.jpeg" className="w-20 h-20 rounded-lg object-cover" />
+                        <div className="flex-1"><h4 className="font-bold text-gray-800 text-sm">牧野東公園旁住宿</h4><div className="text-xs text-gray-500 mt-1">Check-in: 15:00</div></div>
                     </div>
-                    <div class="watercolor-card p-4 mb-4 ${isImportant} hover:shadow-md transition-shadow">
-                        <div class="flex justify-between items-start mb-1">
-                            <span class="font-mono text-sm font-bold ${timeColor}">${event.time} - ${event.end}</span>
-                            <i class="fas ${event.icon} text-gray-300 text-sm"></i>
-                        </div>
-                        <h3 class="text-lg font-bold text-gray-800 mb-1 leading-tight">${event.title}</h3>
-                        ${event.desc ? `<p class="text-sm text-gray-500 mb-2 leading-relaxed line-clamp-2">${event.desc}</p>` : ''}
-                        
-                        <div class="flex justify-end mt-2">
-                             <span class="text-xs text-[#769a9e] bg-[#769a9e]/10 px-2 py-1 rounded-full"><i class="fas fa-search-plus mr-1"></i>攻略</span>
-                        </div>
+                </div>
+                <div>
+                    <h3 className="text-accent font-bold mb-3"><i className="fas fa-ticket-alt mr-2"></i>Vouchers</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="border-2 border-dashed border-gray-300 rounded-xl h-24 flex flex-col items-center justify-center text-gray-400"><i className="fas fa-plus mb-1"></i><span className="text-xs">上傳憑證</span></div>
+                        <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center justify-center"><i className="fas fa-file-pdf text-red-500 text-2xl mb-2"></i><span className="text-xs font-bold text-gray-700">昇龍道巴士券</span></div>
                     </div>
-                </div>`;
-            }).join('');
-            container.innerHTML = html;
-        }
+                </div>
+            </div>
+        );
 
-        function openEventModal(dayIndex, eventIndex) {
-            const event = itineraryData[dayIndex].events[eventIndex];
-            
-            document.getElementById('modal-title').innerText = event.title;
-            document.getElementById('modal-time').innerText = `${event.time} - ${event.end}`;
-            document.getElementById('modal-desc').innerText = event.guide || "暫無特別攻略，請享受旅程！";
-            
-            const tagsContainer = document.getElementById('modal-tags');
-            tagsContainer.innerHTML = '';
-            if (event.tags) {
-                event.tags.forEach(tag => {
-                    const span = document.createElement('span');
-                    span.className = `guide-tag tag-${tag.type}`;
-                    span.innerText = tag.text;
-                    tagsContainer.appendChild(span);
-                });
-            }
+        const GuideTab = () => (
+            <div className="px-4 pt-4 pb-24 space-y-6">
+                <div className="text-center"><h2 className="text-2xl handwriting text-primary">Travel Guide</h2><p className="text-xs text-gray-400">那些旅遊書沒說的故事</p></div>
+                {guideStories.map((s, i) => (
+                    <div key={i} className="bg-white rounded-2xl overflow-hidden shadow-md">
+                        <div className="h-40 relative"><img src={s.img} className="w-full h-full object-cover" /><div className="absolute inset-0 bg-black/20"></div><h3 className="absolute bottom-3 left-3 text-white font-bold text-lg drop-shadow-md">{s.title}</h3></div>
+                        <div className="p-5"><p className="text-sm text-gray-600 leading-7 text-justify font-light">{s.desc}</p></div>
+                    </div>
+                ))}
+            </div>
+        );
 
-            const mapBtn = document.getElementById('modal-map-btn');
-            if (event.location) {
-                mapBtn.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`;
-                mapBtn.style.display = 'flex';
-            } else {
-                mapBtn.style.display = 'none';
-            }
+        const MemberTab = () => (
+            <div className="px-4 pt-4 pb-24">
+                <h2 className="text-2xl handwriting text-center text-secondary mb-6">Family Members</h2>
+                <div className="grid grid-cols-2 gap-4">
+                    {[{n: "爸爸", r: "金主", a: "👨🏻"}, {n: "媽媽", r: "財務長", a: "👩🏻"}, {n: "我", r: "導遊", a: "🙋🏻‍♂️"}, {n: "妹妹", r: "攝影師", a: "👧🏻"}].map((m, i) => (
+                        <div key={i} className="bg-white p-4 rounded-2xl shadow-sm flex flex-col items-center border border-gray-50">
+                            <div className="text-4xl mb-2 bg-paper w-16 h-16 rounded-full flex items-center justify-center shadow-inner">{m.a}</div>
+                            <div className="font-bold text-gray-700">{m.n}</div>
+                            <div className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded mt-1">{m.r}</div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
 
-            document.getElementById('event-modal').classList.add('open');
-            document.body.style.overflow = 'hidden';
-        }
+        function App() {
+            const [activeTab, setActiveTab] = useState('plan');
+            const [dayIndex, setDayIndex] = useState(0);
 
-        function closeModal() {
-            document.getElementById('event-modal').classList.remove('open');
-            document.body.style.overflow = '';
-        }
-
-        function renderGuide() {
-            const container = document.getElementById('guide-container');
-            container.innerHTML = guideData.map(group => {
-                const itemsHtml = group.items.map(spot => `
-                    <div class="watercolor-card overflow-hidden bg-white mb-6">
-                        <div class="h-40 overflow-hidden relative">
-                            <img src="${spot.img}" alt="${spot.title}" class="w-full h-full object-cover">
-                            <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/60 to-transparent p-3 pt-8">
-                                <h3 class="text-white text-lg font-bold tracking-widest">${spot.title}</h3>
+            return (
+                <div className="min-h-screen bg-paper max-w-md mx-auto relative shadow-2xl">
+                    <header className="sticky top-0 z-40 bg-paper/95 backdrop-blur-md px-4 py-3 border-b border-gray-200/50 flex justify-between items-center">
+                        <div><h1 className="text-xl font-bold text-[#5e8b7e]">Nagoya Trip ❄️</h1><p className="text-[10px] text-gray-500 tracking-wider">2026.02.09 - 02.13</p></div>
+                        <div className="w-8 h-8 bg-gray-200 rounded-full overflow-hidden border-2 border-white shadow-sm flex items-center justify-center text-xs">🙋🏻‍♂️</div>
+                    </header>
+                    <main className="min-h-screen">
+                        {activeTab === 'plan' && (
+                            <div className="px-4 pt-4 pb-24">
+                                <div className="flex overflow-x-auto no-scrollbar gap-3 mb-6 pb-2">
+                                    {itineraryData.map((d, i) => (
+                                        <button key={i} onClick={() => setDayIndex(i)} className={`flex-shrink-0 px-4 py-2 rounded-2xl border transition-all min-w-[80px] text-center ${dayIndex === i ? 'bg-primary text-white border-primary shadow-md' : 'bg-white text-gray-400 border-gray-100'}`}>
+                                            <div className="text-xs font-bold">{d.date.split(' ')[0]}</div><div className="text-[10px] opacity-80">{d.date.split(' ')[1]}</div>
+                                        </button>
+                                    ))}
+                                </div>
+                                <div className="space-y-0">{itineraryData[dayIndex].events.map((e, i) => <EventCard key={i} event={e} />)}</div>
+                                <p className="text-center text-xs text-gray-400 mt-8 mb-4">✨ 點擊導覽分頁看更多故事 ✨</p>
                             </div>
-                        </div>
-                        <div class="p-4">
-                            <p class="text-gray-600 text-sm leading-6 text-justify font-light">
-                                <span class="text-3xl float-left mr-2 mt-[-5px] handwriting text-[#e08e79]">${spot.desc.charAt(0)}</span>${spot.desc.slice(1)}
-                            </p>
-                        </div>
-                    </div>
-                `).join('');
-
-                return `
-                    <div class="mb-8">
-                        <h3 class="text-xl handwriting mb-4 ${group.color} border-b border-gray-200 pb-2">
-                            <i class="fas fa-map-pin mr-2 text-sm"></i>${group.category}
-                        </h3>
-                        <div class="space-y-4">
-                            ${itemsHtml}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-        
-        function renderMedia() {
-            const container = document.getElementById('media-container');
-            container.innerHTML = mediaData.map(item => {
-                const iconClass = item.type === 'yt' ? 'fa-youtube yt-icon' : 'fa-instagram ig-icon';
-                const iconBg = item.type === 'yt' ? 'bg-red-50' : 'bg-pink-50';
-                const btnText = item.type === 'yt' ? '觀看影片' : '查看 IG';
-                
-                return `
-                <a href="${item.url}" target="_blank" class="block watercolor-card p-4 transition-transform active:scale-95">
-                    <div class="flex items-start gap-4">
-                        <div class="w-12 h-12 rounded-full ${iconBg} flex items-center justify-center shrink-0">
-                            <i class="fab ${iconClass} text-2xl"></i>
-                        </div>
-                        <div class="flex-1">
-                            <h3 class="font-bold text-gray-800 mb-1">${item.title}</h3>
-                            <p class="text-xs text-gray-500 mb-3 leading-relaxed">${item.desc}</p>
-                            <span class="inline-block text-xs font-bold text-[#769a9e] bg-[#769a9e]/10 px-3 py-1 rounded-full">
-                                <i class="fas fa-play mr-1 text-[10px]"></i> ${btnText}
-                            </span>
-                        </div>
-                        <div class="flex flex-col justify-center h-full text-gray-300">
-                             <i class="fas fa-chevron-right"></i>
-                        </div>
-                    </div>
-                </a>
-                `;
-            }).join('');
+                        )}
+                        {activeTab === 'guide' && <GuideTab />}
+                        {activeTab === 'bookings' && <BookingsTab />}
+                        {activeTab === 'expense' && <ExpenseTab />}
+                        {activeTab === 'members' && <MemberTab />}
+                    </main>
+                    <nav className="fixed bottom-0 w-full max-w-md bg-white/95 backdrop-blur-md border-t border-gray-200 pb-safe pt-2 px-6 flex justify-between items-center z-50 rounded-t-3xl shadow-[0_-5px_15px_rgba(0,0,0,0.05)] h-[80px]">
+                        {[{ id: 'plan', icon: 'fa-calendar-alt', label: '行程' }, { id: 'guide', icon: 'fa-book-open', label: '導覽' }, { id: 'bookings', icon: 'fa-ticket-alt', label: '預訂' }, { id: 'expense', icon: 'fa-wallet', label: '記帳' }, { id: 'members', icon: 'fa-users', label: '成員' }].map((item) => (
+                            <button key={item.id} onClick={() => setActiveTab(item.id)} className={`flex flex-col items-center gap-1 transition-colors ${activeTab === item.id ? 'text-primary' : 'text-gray-300'}`}>
+                                <div className={`text-xl mb-0.5 ${activeTab === item.id ? 'transform -translate-y-1 transition-transform' : ''}`}><i className={`fas ${item.icon}`}></i></div><span className="text-[9px] font-bold">{item.label}</span>
+                            </button>
+                        ))}
+                    </nav>
+                </div>
+            );
         }
 
-        // 修改後的 Checklist 渲染函式
-        function renderChecklist() {
-            const container = document.getElementById('checklist-container');
-            const savedState = JSON.parse(localStorage.getItem('family_checklist_state')) || {};
-            
-            container.innerHTML = defaultPackingList.map((item, index) => {
-                let checkboxes = '';
-                familyMembers.forEach((member, mIndex) => {
-                    const key = `${item}_${mIndex}`;
-                    const isChecked = savedState[key] ? 'checked' : '';
-                    checkboxes += `
-                        <input type="checkbox" id="check-${index}-${mIndex}" 
-                            class="check-input" ${isChecked} 
-                            onchange="toggleFamilyCheck('${item}', ${mIndex})">
-                    `;
-                });
-
-                return `
-                <div class="family-check-grid py-2 border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
-                    <div class="text-sm text-gray-700 pl-1 font-medium">${item}</div>
-                    ${checkboxes}
-                </div>`;
-            }).join('');
-        }
-
-        function toggleFamilyCheck(item, memberIndex) {
-            const savedState = JSON.parse(localStorage.getItem('family_checklist_state')) || {};
-            const key = `${item}_${memberIndex}`;
-            
-            if (savedState[key]) {
-                delete savedState[key];
-            } else {
-                savedState[key] = true;
-            }
-            
-            localStorage.setItem('family_checklist_state', JSON.stringify(savedState));
-            renderChecklist();
-        }
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
     </script>
 </body>
 </html>
