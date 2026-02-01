@@ -166,6 +166,8 @@
             object-fit: contain;
             background: white;
             margin-bottom: 5px;
+            /* 防止破圖時太難看 */
+            min-height: 100px; 
         }
     </style>
 </head>
@@ -410,33 +412,36 @@
             <div class="text-xs text-gray-400 mb-4 text-center">請於入境審查時出示此畫面</div>
             
             <div class="vjw-grid" id="vjw-grid-container">
-                </div>
+            </div>
         </div>
     </div>
 
     <script>
         // ==========================================
-        // VJW 圖片設定區 (請在此處貼上您的圖片網址)
+        // VJW 圖片設定區 
+        // ⚠️ 請修改 url 為您的 GitHub 圖片路徑 (例如: "./images/dad.jpg")
         // ==========================================
         const vjwImages = [
-            { name: "盧岳懋", url: "https://via.placeholder.com/300?text=QR+Dad" },
-            { name: "黃春燕", url: "https://via.placeholder.com/300?text=QR+Mom" },
-            { name: "盧瑞祥", url: "https://drive.google.com/uc?export=view&id=1kXOUmIvpQZK9tt8L7CprTOLpn7BTB25C" },
-            { name: "盧藝", url: "https://via.placeholder.com/300?text=QR+Sis" },
-            { name: "劉庭吟", url: "https://drive.google.com/uc?export=view&id=127VBRCMzaFCVQW7t3WhNthoZ-L3mNgZc" }
+            { name: "盧岳懋", url: "https://placehold.co/300x300/eee/31343C?text=QR+Dad" },
+            { name: "黃春燕", url: "https://placehold.co/300x300/eee/31343C?text=QR+Mom" },
+            { name: "盧瑞祥", url: "images/LUJHUHSIANG.jpg" },
+            { name: "盧藝", url: "https://placehold.co/300x300/eee/31343C?text=QR+Sis" },
+            { name: "劉庭吟", url: "images/LIOUTINGYIN.jpg" }
         ];
 
         // ==========================================
-        // 2/9 - 2/13 天氣預報設定 (靜態顯示)
+        // 天氣資料設定
         // ==========================================
+        // 1. 靜態備份資料 (當日期太久遠時使用)
         const staticWeatherData = {
             "2/9":  { min: 3, max: 10, icon: "fa-cloud-sun", condition: "晴時多雲" },
             "2/10": { min: 2, max: 9,  icon: "fa-cloud", condition: "多雲" },
-            "2/11": { min: -3, max: 2, icon: "fa-snowflake", condition: "下雪" }, // 白川鄉特別冷
+            "2/11": { min: -3, max: 2, icon: "fa-snowflake", condition: "下雪" }, 
             "2/12": { min: 1, max: 11, icon: "fa-sun", condition: "晴朗" },
             "2/13": { min: 2, max: 12, icon: "fa-sun", condition: "晴朗" }
         };
 
+        // 2. 地點經緯度 (Open-Meteo 使用)
         const locationCoords = {
             "Nagoya": { lat: 35.1815, lon: 136.9066 },
             "Tokoname": { lat: 34.8893, lon: 136.8346 },
@@ -725,7 +730,121 @@
             `).join('');
         }
 
-        // 修改後的 renderItinerary：直接讀取靜態天氣數據
+        // --- Open-Meteo 天氣處理邏輯 ---
+
+        // 1. WMO 代碼轉文字圖示
+        function getWeatherInfo(code) {
+            if (code === 0) return { icon: "fa-sun", text: "晴朗", color: "text-orange-400" };
+            if ([1, 2, 3].includes(code)) return { icon: "fa-cloud-sun", text: "多雲", color: "text-gray-500" };
+            if ([45, 48].includes(code)) return { icon: "fa-smog", text: "有霧", color: "text-gray-400" };
+            if ([51, 53, 55].includes(code)) return { icon: "fa-cloud-rain", text: "毛毛雨", color: "text-blue-400" };
+            if ([61, 63, 65, 80, 81, 82].includes(code)) return { icon: "fa-umbrella", text: "下雨", color: "text-blue-600" };
+            if ([71, 73, 75, 77, 85, 86].includes(code)) return { icon: "fa-snowflake", text: "下雪", color: "text-cyan-300" };
+            if ([95, 96, 99].includes(code)) return { icon: "fa-bolt", text: "雷雨", color: "text-yellow-500" };
+            return { icon: "fa-question", text: "未知", color: "text-gray-400" };
+        }
+
+        // 2. 非同步獲取天氣
+        async function fetchWeather(lat, lon, dateString, elementId, fallbackData) {
+            const container = document.getElementById(elementId);
+            
+            // 設定年份 (行程是 2026)
+            // 💡 若要測試「即時天氣」，可暫時將下方改為 "2025" 或當前年份
+            const year = "2026"; 
+            
+            const [month, day] = dateString.split('/');
+            const formattedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+            
+            // 檢查日期是否在 API 可預測範圍內 (未來 14 天)
+            const targetDate = new Date(formattedDate);
+            const today = new Date();
+            const diffTime = targetDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            // 如果日期太遠 (>14天) 或 是過去日期，直接使用靜態備份資料
+            // 這樣就不會因為還沒到 2026 年而顯示錯誤
+            if (diffDays > 14 || diffDays < 0) {
+                // 為了除錯方便，這裡可以 console.log
+                // console.log(`日期 ${formattedDate} 超出預報範圍，使用靜態資料`);
+                renderWeatherCard(container, fallbackData, false);
+                return;
+            }
+
+            // 顯示讀取中動畫
+            container.innerHTML = `
+                <div class="watercolor-card p-4 mb-4 mx-2 flex items-center justify-center gap-2 text-gray-400">
+                    <i class="fas fa-spinner fa-spin"></i> 正在更新當地天氣...
+                </div>
+            `;
+
+            try {
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&start_date=${formattedDate}&end_date=${formattedDate}`;
+                
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.daily && data.daily.time.length > 0) {
+                    const code = data.daily.weathercode[0];
+                    const max = Math.round(data.daily.temperature_2m_max[0]);
+                    const min = Math.round(data.daily.temperature_2m_min[0]);
+                    const info = getWeatherInfo(code);
+
+                    const dynamicData = {
+                        min: min,
+                        max: max,
+                        icon: info.icon,
+                        condition: info.text,
+                        color: info.color,
+                        outfit: fallbackData.outfit // 保留原本的穿搭建議
+                    };
+                    
+                    renderWeatherCard(container, dynamicData, true);
+                } else {
+                    throw new Error("No data");
+                }
+            } catch (error) {
+                console.error("Weather fetch failed:", error);
+                renderWeatherCard(container, fallbackData, false);
+            }
+        }
+
+        // 3. 渲染天氣卡片
+        function renderWeatherCard(container, data, isLive) {
+            let outfitSuggestion = data.outfit || "根據氣溫調整穿著。";
+            
+            // 簡單的即時動態穿搭建議修正
+            if(isLive) {
+                if(data.max < 5) outfitSuggestion = "⚠️ 預報極寒！請務必穿著發熱衣、羽絨外套並配戴手套。";
+                else if(data.max < 15) outfitSuggestion = "氣溫偏低，建議洋蔥式穿搭，室內有暖氣。";
+            }
+
+            const liveTag = isLive ? `<span class="bg-red-500 text-white text-[10px] px-1 rounded ml-1 animate-pulse">LIVE</span>` : '';
+            const iconColor = data.color || "text-[#769a9e]";
+
+            container.innerHTML = `
+                <div class="watercolor-card p-4 bg-gradient-to-br from-[#fdfbf7] to-[#fff] border-l-4 border-[#769a9e] mb-4 mx-2">
+                    <div class="flex items-center gap-4">
+                        <div class="text-center w-16 shrink-0 ${iconColor}">
+                            <i class="fas ${data.icon} text-2xl mb-1"></i>
+                            <div class="font-bold text-sm text-nowrap">${data.min}°-${data.max}°</div>
+                        </div>
+                        <div class="flex-1 border-l border-gray-100 pl-4">
+                            <div class="flex items-center mb-1">
+                                <span class="text-xs text-gray-500 tracking-wider font-bold mr-1">當地天氣</span>
+                                <span class="text-xs text-gray-400">${data.condition}</span>
+                                ${liveTag}
+                            </div>
+                            <div class="text-sm text-gray-600 font-medium leading-relaxed">
+                                <i class="fas fa-tshirt text-[#e6a496] mr-1"></i>
+                                ${outfitSuggestion}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 更新後的主行程渲染函式
         function renderItinerary(index) {
             document.querySelectorAll('.date-btn').forEach(btn => {
                 btn.classList.remove('bg-[#5e8b7e]', 'text-white', 'ring-2');
@@ -738,32 +857,24 @@
             const dayData = itineraryData[index];
             const locKey = dayData.locationKey || "Nagoya";
             
-            // 直接讀取靜態天氣
-            const weather = staticWeatherData[dayData.date] || { min: 5, max: 12, icon: "fa-cloud-sun", condition: "多雲時晴" };
+            // 準備備份用的靜態資料 (結合穿搭建議)
+            const fallbackWeather = { 
+                ...staticWeatherData[dayData.date] || { min: 5, max: 12, icon: "fa-cloud-sun", condition: "多雲時晴" },
+                outfit: dayData.outfit 
+            };
 
-            const weatherContainer = document.getElementById('weather-card-container');
-            
-            const weatherHtml = `
-                <div class="watercolor-card p-4 bg-gradient-to-br from-[#fdfbf7] to-[#fff] border-l-4 border-[#769a9e] mb-4 mx-2">
-                    <div class="flex items-center gap-4">
-                        <div class="text-center w-16 shrink-0 text-[#769a9e]">
-                            <i class="fas ${weather.icon} text-2xl mb-1"></i>
-                            <div class="font-bold text-sm text-nowrap">${weather.min}°-${weather.max}°</div>
-                        </div>
-                        <div class="flex-1 border-l border-gray-100 pl-4">
-                            <div class="flex items-center mb-1">
-                                <span class="text-xs text-gray-500 tracking-wider font-bold mr-1">${locKey === 'Shirakawa' ? '白川鄉' : (locKey === 'Takayama' ? '高山' : (locKey === 'Tokoname' ? '常滑' : '名古屋'))}</span>
-                                <span class="text-xs text-gray-400">${weather.condition}</span>
-                            </div>
-                            <div class="text-sm text-gray-600 font-medium leading-relaxed">
-                                <i class="fas fa-tshirt text-[#e6a496] mr-1"></i>
-                                ${dayData.outfit}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            weatherContainer.innerHTML = weatherHtml;
+            // 呼叫天氣 API
+            if (locationCoords[locKey]) {
+                fetchWeather(
+                    locationCoords[locKey].lat, 
+                    locationCoords[locKey].lon, 
+                    dayData.date, 
+                    'weather-card-container',
+                    fallbackWeather
+                );
+            } else {
+                renderWeatherCard(document.getElementById('weather-card-container'), fallbackWeather, false);
+            }
 
             const container = document.getElementById('itinerary-container');
             let html = `<div class="pl-8 mb-6"><div class="inline-block bg-[#e08e79]/10 text-[#e08e79] px-3 py-1 rounded-full text-xs font-bold border border-[#e08e79]/20"><i class="fas fa-bed mr-1"></i> ${dayData.hotel}</div></div>`;
@@ -782,144 +893,3 @@
                             <span class="font-mono text-sm font-bold ${timeColor}">${event.time} - ${event.end}</span>
                             <i class="fas ${event.icon} text-gray-300 text-sm"></i>
                         </div>
-                        <h3 class="text-lg font-bold text-gray-800 mb-1 leading-tight">${event.title}</h3>
-                        ${event.desc ? `<p class="text-sm text-gray-500 mb-2 leading-relaxed line-clamp-2">${event.desc}</p>` : ''}
-                        
-                        <div class="flex justify-end mt-2">
-                             <span class="text-xs text-[#769a9e] bg-[#769a9e]/10 px-2 py-1 rounded-full"><i class="fas fa-search-plus mr-1"></i>攻略</span>
-                        </div>
-                    </div>
-                </div>`;
-            }).join('');
-            container.innerHTML = html;
-        }
-
-        function openEventModal(dayIndex, eventIndex) {
-            const event = itineraryData[dayIndex].events[eventIndex];
-            
-            document.getElementById('modal-title').innerText = event.title;
-            document.getElementById('modal-time').innerText = `${event.time} - ${event.end}`;
-            document.getElementById('modal-desc').innerText = event.guide || "暫無特別攻略，請享受旅程！";
-            
-            const tagsContainer = document.getElementById('modal-tags');
-            tagsContainer.innerHTML = '';
-            if (event.tags) {
-                event.tags.forEach(tag => {
-                    const span = document.createElement('span');
-                    span.className = `guide-tag tag-${tag.type}`;
-                    span.innerText = tag.text;
-                    tagsContainer.appendChild(span);
-                });
-            }
-
-            const mapBtn = document.getElementById('modal-map-btn');
-            if (event.location) {
-                mapBtn.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`;
-                mapBtn.style.display = 'flex';
-            } else {
-                mapBtn.style.display = 'none';
-            }
-
-            document.getElementById('event-modal').classList.add('open');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeModal() {
-            document.getElementById('event-modal').classList.remove('open');
-            document.body.style.overflow = '';
-        }
-        
-        // VJW Modal 相關功能
-        function openVJWModal() {
-            const container = document.getElementById('vjw-grid-container');
-            container.innerHTML = vjwImages.map(person => `
-                <div class="vjw-item">
-                    <img src="${person.url}" class="vjw-img" alt="${person.name} QR">
-                    <div class="font-bold text-gray-700">${person.name}</div>
-                </div>
-            `).join('');
-            
-            document.getElementById('vjw-modal').classList.add('open');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeVJWModal() {
-            document.getElementById('vjw-modal').classList.remove('open');
-            document.body.style.overflow = '';
-        }
-
-        function renderGuide() {
-            const container = document.getElementById('guide-container');
-            container.innerHTML = guideData.map(group => {
-                const itemsHtml = group.items.map(spot => `
-                    <div class="watercolor-card overflow-hidden bg-white mb-6">
-                        <div class="h-40 overflow-hidden relative">
-                            <img src="${spot.img}" alt="${spot.title}" class="w-full h-full object-cover">
-                            <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/60 to-transparent p-3 pt-8">
-                                <h3 class="text-white text-lg font-bold tracking-widest">${spot.title}</h3>
-                            </div>
-                        </div>
-                        <div class="p-4">
-                            <p class="text-gray-600 text-sm leading-6 text-justify font-light">
-                                <span class="text-3xl float-left mr-2 mt-[-5px] handwriting text-[#e08e79]">${spot.desc.charAt(0)}</span>${spot.desc.slice(1)}
-                            </p>
-                        </div>
-                    </div>
-                `).join('');
-
-                return `
-                    <div class="mb-8">
-                        <h3 class="text-xl handwriting mb-4 ${group.color} border-b border-gray-200 pb-2">
-                            <i class="fas fa-map-pin mr-2 text-sm"></i>${group.category}
-                        </h3>
-                        <div class="space-y-4">
-                            ${itemsHtml}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-        
-        // 修改後的 Checklist (純文字清單)
-        function renderChecklist() {
-            const container = document.getElementById('checklist-container');
-            container.innerHTML = defaultPackingList.map(item => `
-                <li class="flex items-center gap-3 text-gray-700">
-                    <i class="fas fa-check-circle text-[#769a9e]/30"></i>
-                    <span>${item}</span>
-                </li>
-            `).join('');
-        }
-
-        // 匯率計算功能
-        function calculateRate(source) {
-            const rateInput = document.getElementById('exchange-rate');
-            const jpyInput = document.getElementById('input-jpy');
-            const twdInput = document.getElementById('input-twd');
-            
-            let rate = parseFloat(rateInput.value);
-            if (isNaN(rate) || rate <= 0) rate = 0.215;
-
-            if (source === 'jpy') {
-                const jpy = parseFloat(jpyInput.value);
-                if (!isNaN(jpy)) {
-                    twdInput.value = Math.round(jpy * rate);
-                } else {
-                    twdInput.value = '';
-                }
-            } else if (source === 'twd') {
-                const twd = parseFloat(twdInput.value);
-                if (!isNaN(twd)) {
-                    jpyInput.value = Math.round(twd / rate);
-                } else {
-                    jpyInput.value = '';
-                }
-            } else if (source === 'rate') {
-                if (jpyInput.value) {
-                    calculateRate('jpy');
-                }
-            }
-        }
-    </script>
-</body>
-</html>
