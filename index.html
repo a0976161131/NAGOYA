@@ -3,428 +3,305 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>名古屋・冬之旅</title>
+    <title>名古屋・冬之旅 (多人協作帳本版)</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Yomogi&family=Noto+Sans+TC:wght@400;500;700&swap" rel="stylesheet">
 
     <style>
-        /* 自定義樣式設定 */
         :root {
             --bg-paper: #f9f7f2;
-            --primary: #769a9e; /* 莫蘭迪綠 */
-            --secondary: #e6a496; /* 珊瑚粉 */
-            --accent: #dca856; /* 芥末黃 */
+            --primary: #769a9e;
+            --secondary: #e6a496;
+            --accent: #dca856;
             --text-main: #4a4a4a;
-            --text-light: #7a7a7a;
         }
 
         body {
-            /* 全域字體改為思源黑體/台北黑體風格 */
-            font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif;
             background-color: var(--bg-paper);
             color: var(--text-main);
-            /* 模擬紙張紋理 */
             background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
             -webkit-font-smoothing: antialiased;
         }
 
-        h1, h2, .handwriting {
-            font-family: 'Yomogi', cursive;
-        }
+        h1, h2, h3, .handwriting { font-family: 'Yomogi', cursive; }
 
-        /* 隱藏捲軸但保留功能 */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        /* 水彩風格卡片 (不規則邊框) */
         .watercolor-card {
             background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(4px);
-            border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
-            box-shadow: 2px 4px 12px rgba(0, 0, 0, 0.08);
-            border: 1px solid rgba(0,0,0,0.02);
-            transition: transform 0.2s ease;
-        }
-        
-        .watercolor-card:active {
-            transform: scale(0.98);
-        }
-
-        /* 水彩按鈕 */
-        .btn-water {
-            border-radius: 25px 255px 25px 255px / 255px 25px 255px 25px;
-            transition: all 0.3s ease;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
-        }
-
-        /* 時間軸線條 */
-        .timeline-line::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 14px;
-            width: 2px;
-            background: #e0e0e0;
-            border-radius: 2px;
-            z-index: 0;
-        }
-
-        /* 底部導航選中態 */
-        .nav-item.active {
-            color: var(--primary);
-            font-weight: bold;
-        }
-        .nav-item.active i {
-            background-color: rgba(118, 154, 158, 0.2);
-            border-radius: 50%;
-            padding: 8px;
-            transform: scale(1.1);
-        }
-
-        /* 勾選框樣式 */
-        .custom-checkbox:checked + label {
-            text-decoration: line-through;
-            color: #aaa;
-            opacity: 0.7;
-        }
-        
-        /* 頁面切換動畫 */
-        .tab-content {
-            display: none;
-            animation: fadeIn 0.4s ease-out;
-        }
-        .tab-content.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .memo-link {
-            display: inline-block;
-            margin: 4px;
-            padding: 4px 12px;
-            background-color: var(--secondary);
-            color: white;
             border-radius: 20px;
-            font-size: 0.85rem;
-            text-decoration: none;
+            box-shadow: 2px 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0,0,0,0.02);
         }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .nav-item.active { color: var(--primary); font-weight: bold; }
+        
+        /* 帳本專用樣式 */
+        .expense-item { border-bottom: 1px dashed #eee; }
+        .category-tag { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; color: white; }
+        .cat-food { background: #e67e22; }
+        .cat-trans { background: #3498db; }
+        .cat-play { background: #27ae60; }
+        .cat-other { background: #95a5a6; }
+
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            z-index: 100; backdrop-filter: blur(3px); align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal-overlay.open { display: flex; }
     </style>
 </head>
 <body class="pb-24">
 
     <header class="sticky top-0 z-50 bg-[#f9f7f2]/95 backdrop-blur-md px-4 py-3 shadow-sm border-b border-gray-200/50">
         <div class="flex justify-between items-center">
-            <div>
-                <h1 class="text-2xl font-bold text-[#5e8b7e]">Nagoya Trip ❄️</h1>
-                <p class="text-xs text-gray-500 font-sans tracking-wide">2026.02.09 - 02.13</p>
-            </div>
-            <div class="text-right text-xs text-gray-600 bg-white/60 p-2 rounded-lg border border-gray-100 font-mono">
-                <div>🛫 CI154 07:35</div>
-                <div>🛬 CI155 12:05</div>
+            <h1 class="text-2xl font-bold text-[#5e8b7e]">Nagoya Ledger ❄️</h1>
+            <div id="sync-status" class="text-[10px] text-gray-400 font-mono bg-white px-2 py-1 rounded-full border border-gray-100">
+                <i class="fas fa-cloud"></i> 同步中...
             </div>
         </div>
     </header>
 
-    <section id="plan" class="tab-content active px-4 pt-4">
-        <div class="flex overflow-x-auto no-scrollbar gap-3 mb-6 pb-2" id="date-scroll"></div>
-        <div id="itinerary-container" class="space-y-6 relative timeline-line"></div>
-    </section>
+    <main>
+        <section id="plan" class="tab-content active p-4">
+             <div id="itinerary-placeholder" class="text-center py-10 text-gray-400">正在載入行程資料...</div>
+        </section>
 
-    <section id="guide" class="tab-content px-4 pt-4 space-y-6">
-        <div class="text-center mb-4">
-            <h2 class="text-2xl handwriting text-[#769a9e]">Travel Guide</h2>
-            <p class="text-sm text-gray-500">城市的記憶與故事</p>
-        </div>
-        <div id="guide-container" class="space-y-8"></div>
-    </section>
-
-    <section id="lists" class="tab-content px-4 pt-4">
-        <div class="mb-8">
-            <h2 class="text-xl handwriting mb-3 text-[#e6a496]"><i class="fas fa-suitcase-rolling mr-2"></i>Packing List</h2>
-            <div class="bg-white p-5 rounded-[20px] shadow-sm relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-full h-1 bg-[#e6a496]"></div>
-                <div id="checklist-container" class="space-y-3"></div>
+        <section id="ledger" class="tab-content p-4">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl handwriting text-[#769a9e]">Travel Ledger</h2>
+                <p class="text-sm text-gray-500">大家一起記，回國不吵架</p>
             </div>
-        </div>
-        <div class="mb-20">
-            <h2 class="text-xl handwriting mb-3 text-[#dca856]"><i class="fas fa-pen-nib mr-2"></i>Memo</h2>
-            <div class="bg-white p-4 rounded-[20px] shadow-sm border border-gray-100">
-                <textarea id="user-memo" class="w-full h-40 p-3 text-gray-700 bg-[#fdfbf7] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#dca856]/50 resize-none text-sm" placeholder="隨手記下想去的店、購物清單..."></textarea>
-                <div id="memo-links-area" class="mt-3 flex flex-wrap gap-2"></div>
+
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <div class="watercolor-card p-4 border-t-4 border-[#769a9e]">
+                    <div class="text-xs text-gray-400 mb-1">總支出 (JPY)</div>
+                    <div class="text-xl font-bold text-[#5e8b7e] font-mono" id="total-amount">0</div>
+                </div>
+                <div class="watercolor-card p-4 border-t-4 border-[#e6a496]">
+                    <div class="text-xs text-gray-400 mb-1">平均每人</div>
+                    <div class="text-xl font-bold text-[#e6a496] font-mono" id="avg-amount">0</div>
+                </div>
             </div>
-        </div>
-    </section>
 
-    <section id="info" class="tab-content px-4 pt-4">
-        <div class="grid grid-cols-2 gap-4 mb-6">
-            <a href="https://www.jma.go.jp/bosai/forecast/" target="_blank" class="watercolor-card p-4 flex flex-col items-center justify-center gap-2 text-center text-[#5e8b7e]">
-                <i class="fas fa-cloud-sun text-3xl"></i>
-                <span class="font-bold">天氣預報</span>
-                <span class="text-xs text-gray-400">日本氣象廳</span>
-            </a>
-            <a href="https://vjw-lp.digital.go.jp/en/" target="_blank" class="watercolor-card p-4 flex flex-col items-center justify-center gap-2 text-center text-[#e6a496]">
-                <i class="fas fa-qrcode text-3xl"></i>
-                <span class="font-bold">Visit Japan Web</span>
-                <span class="text-xs text-gray-400">入境登錄</span>
-            </a>
-        </div>
-    </section>
+            <div class="watercolor-card p-4 mb-6 bg-[#fdfbf7]">
+                <h3 class="text-sm font-bold mb-3 border-b border-gray-100 pb-2"><i class="fas fa-balance-scale mr-2"></i>結算分析</h3>
+                <div id="settlement-list" class="space-y-2">
+                    <div class="text-center text-xs text-gray-400">輸入帳目後顯示</div>
+                </div>
+            </div>
 
-    <nav class="fixed bottom-0 left-0 w-full bg-white/90 backdrop-filter backdrop-blur-lg border-t border-gray-200 pb-safe pt-2 px-6 flex justify-between items-center z-50 h-[80px] rounded-t-[20px] shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
-        <button onclick="switchTab('plan')" class="nav-item active flex flex-col items-center gap-1 text-gray-400 transition-colors w-16" id="nav-plan">
-            <i class="fas fa-calendar-alt text-lg"></i>
-            <span class="text-[10px]">行程</span>
+            <div class="watercolor-card overflow-hidden">
+                <div class="bg-white/50 p-3 border-b border-gray-100 flex justify-between items-center">
+                    <span class="text-sm font-bold">消費清單</span>
+                    <button onclick="openLedgerModal()" class="bg-[#769a9e] text-white text-xs px-3 py-1 rounded-full shadow-sm">
+                        <i class="fas fa-plus mr-1"></i>新增帳目
+                    </button>
+                </div>
+                <div id="ledger-list" class="max-h-[400px] overflow-y-auto">
+                    </div>
+            </div>
+        </section>
+
+        <section id="info" class="tab-content p-4">
+             <div class="text-center py-10 text-gray-400 italic">更多資訊請參考原本版本...</div>
+        </section>
+    </main>
+
+    <nav class="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-lg border-t border-gray-200 pb-safe pt-2 px-2 flex justify-between items-center z-50 h-[80px] rounded-t-[20px] shadow-lg">
+        <button onclick="switchTab('plan')" class="nav-item active flex flex-col items-center gap-1 flex-1" id="nav-plan">
+            <i class="fas fa-calendar-alt text-lg"></i><span class="text-[10px]">行程</span>
         </button>
-        <button onclick="switchTab('guide')" class="nav-item flex flex-col items-center gap-1 text-gray-400 transition-colors w-16" id="nav-guide">
-            <i class="fas fa-book-open text-lg"></i>
-            <span class="text-[10px]">導覽</span>
+        <button onclick="switchTab('ledger')" class="nav-item flex flex-col items-center gap-1 flex-1" id="nav-ledger">
+            <i class="fas fa-calculator text-lg"></i><span class="text-[10px]">帳本</span>
         </button>
-        <button onclick="switchTab('lists')" class="nav-item flex flex-col items-center gap-1 text-gray-400 transition-colors w-16" id="nav-lists">
-            <i class="fas fa-list-check text-lg"></i>
-            <span class="text-[10px]">清單</span>
-        </button>
-        <button onclick="switchTab('info')" class="nav-item flex flex-col items-center gap-1 text-gray-400 transition-colors w-16" id="nav-info">
-            <i class="fas fa-info-circle text-lg"></i>
-            <span class="text-[10px]">資訊</span>
+        <button onclick="switchTab('info')" class="nav-item flex flex-col items-center gap-1 flex-1" id="nav-info">
+            <i class="fas fa-info-circle text-lg"></i><span class="text-[10px]">資訊</span>
         </button>
     </nav>
 
-    <script>
-        // 資料區
-        const itineraryData = [
-            {
-                date: "2/9",
-                day: "週一",
-                hotel: "牧野東公園旁住宿",
-                events: [
-                    { time: "05:00", end: "05:30", title: "前往桃園機場", icon: "fa-car", important: true },
-                    { time: "07:35", end: "11:05", title: "TPE ✈️ NGO (CI154)", icon: "fa-plane", desc: "抵達中部國際機場 T1" },
-                    { time: "12:00", end: "12:20", title: "移動：機場 → 常滑", icon: "fa-train", important: true },
-                    { time: "12:20", end: "14:00", title: "常滑散策", icon: "fa-cat", desc: "常滑老街、招財貓道、吃地瓜", location: "常滑老街" },
-                    { time: "14:00", end: "15:00", title: "移動：名古屋站 → 住宿", icon: "fa-suitcase", important: true },
-                    { time: "15:00", end: "15:40", title: "移動：住宿 → 熱田神宮", icon: "fa-train", important: true },
-                    { time: "15:40", end: "17:30", title: "熱田神宮", icon: "fa-torii-gate", desc: "參拜、散步、商店街小吃", location: "熱田神宮" },
-                    { time: "17:30", end: "18:00", title: "移動：熱田神宮 → 蓬萊軒 鰻魚飯", icon: "fa-train", important: true },
-                    { time: "18:00", end: "21:30", title: "蓬萊軒 鰻魚飯", icon: "fa-utensils", desc: "松阪屋店，排隊＋用餐，空檔逛 PARCO", location: "蓬萊軒 松坂屋店" },
-                    { time: "21:30", end: "22:00", title: "返回住宿", icon: "fa-bed" }
-                ]
-            },
-            {
-                date: "2/10",
-                day: "週二",
-                hotel: "牧野東公園旁住宿",
-                events: [
-                    { time: "07:10", end: "07:30", title: "前往早餐店/睡覺", icon: "fa-walking", important: true },
-                    { time: "08:00", end: "08:45", title: "Tsubame Bread & Milk", icon: "fa-bread-slice", desc: "名古屋早餐店", location: "Tsubame Bread & Milk" },
-                    { time: "08:45", end: "09:00", title: "移動：Tsubame Bread & Milk → 住宿", icon: "fa-walking", important: true },
-                    { time: "09:00", end: "09:45", title: "化妝、準備", icon: "fa-star" },
-                    { time: "09:45", end: "10:10", title: "移動：前往11PhotoStudio", icon: "fa-bus", important: true },
-                    { time: "10:10", end: "12:30", title: "11PhotoStudio 和服換裝", icon: "fa-user-tie", desc: "換裝後前往犬山城拍照", location: "11PhotoStudio 名古屋" },
-                    { time: "12:30", end: "13:00", title: "移動：前往犬山城", icon: "fa-bus", important: true },
-                    { time: "13:00", end: "16:00", title: "犬山城 ＆ 城下町", icon: "fa-chess-rook", desc: "三光稻荷神社洗錢 (準備台/澳幣)", location: "犬山城" },
-                    { time: "16:00", end: "16:30", title: "移動：前往11PhotoStudio", icon: "fa-bus", important: true },
-                    { time: "16:30", end: "18:00", title: "歸還和服", icon: "fa-star" },
-                    { time: "18:00", end: "18:30", title: "移動：前往榮商圈", icon: "fa-subway", important: true },
-                    { time: "18:30", end: "20:00", title: "榮商圈晚餐", icon: "fa-utensils", location: "榮商圈" },
-                    { time: "20:00", end: "21:00", title: "中部電力塔/綠洲21 夜景", icon: "fa-tower-observation", desc: "久屋大通散步", location: "中部電力 MIRAI TOWER" },
-                    { time: "21:00", end: "22:00", title: "返回住宿", icon: "fa-bed", desc: "記得買明天的早餐" }
-                ]
-            },
-            {
-                date: "2/11",
-                day: "週三",
-                hotel: "牧野東公園旁住宿",
-                events: [
-                    { time: "08:00", end: "10:10", title: "移動：前往白川鄉", icon: "fa-bus", important: true },
-                    { time: "10:10", end: "11:50", title: "白川鄉合掌村", icon: "fa-snowflake", desc: "11:40 準備回停車場", location: "白川鄉合掌村" },
-                    { time: "12:00", end: "13:00", title: "移動：前往飛驒高山", icon: "fa-bus", important: true },
-                    { time: "13:00", end: "14:30", title: "午餐：味之与平", icon: "fa-utensils", desc: "不用吃太飽，留胃逛老街", location: "味之与平" },
-                    { time: "14:30", end: "15:40", title: "飛驒高山老街", icon: "fa-store", location: "飛驒高山老街" },
-                    { time: "15:50", end: "18:20", title: "移動：返回名古屋市區", icon: "fa-bus", important: true },
-                    { time: "18:30", end: "20:00", title: "晚餐", icon: "fa-utensils", desc: "海老どて食堂 (名古屋地下街)", location: "海老どて食堂 エスカ店" },
-                    { time: "20:00", end: "20:30", title: "返回住宿", icon: "fa-bed", desc: "有力氣的話可以去永旺逛逛" }
-                ]
-            },
-            {
-                date: "2/12",
-                day: "週四",
-                hotel: "JR Gate Tower Hotel",
-                events: [
-                    { time: "08:30", end: "09:00", title: "Airbnb 退房", icon: "fa-door-open" },
-                    { time: "09:00", end: "09:20", title: "飯店寄放行李", icon: "fa-luggage-cart", location: "Nagoya JR Gate Tower Hotel" },
-                    { time: "09:30", end: "10:00", title: "移動：前往名古屋城", icon: "fa-train", important: true },
-                    { time: "10:00", end: "11:30", title: "名古屋城", icon: "fa-archway", desc: "參觀本丸御殿", location: "名古屋城" },
-                    { time: "11:30", end: "12:00", title: "移動：Gate Tower/高島屋", icon: "fa-train", important: true },
-                    { time: "12:00", end: "14:00", title: "Gate Tower/高島屋 午餐", icon: "fa-utensils" },
-                    { time: "14:00", end: "18:00", title: "Gate Tower Mall 逛街", icon: "fa-shopping-bag" },
-                    { time: "18:00", end: "18:30", title: "Check In 休息", icon: "fa-bed", important: true },
-                    { time: "18:30", end: "20:30", title: "名古屋站周邊晚餐/逛街、伴手禮", icon: "fa-utensils" }
-                ]
-            },
-            {
-                date: "2/13",
-                day: "週五",
-                hotel: "Home Sweet Home",
-                events: [
-                    { time: "08:00", end: "09:00", title: "名鐵 μ-SKY → 機場", icon: "fa-train", important: true },
-                    { time: "09:00", end: "12:05", title: "報到、出境、免稅店", icon: "fa-passport" },
-                    { time: "12:05", end: "14:40", title: "NGO ✈️ TPE (CI155)", icon: "fa-plane-departure" }
-                ]
+    <div id="ledger-modal" class="modal-overlay" onclick="closeLedgerModal(event)">
+        <div class="bg-white w-full max-w-sm rounded-[25px] overflow-hidden" onclick="event.stopPropagation()">
+            <div class="bg-[#769a9e] p-4 text-white text-center">
+                <h3 class="font-bold">新增旅行支出</h3>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="text-xs text-gray-400 block mb-1">支付者</label>
+                    <select id="exp-payer" class="w-full bg-gray-50 border-0 rounded-lg p-2 text-sm focus:ring-2 ring-[#769a9e]">
+                        <option value="成員A">成員A</option>
+                        <option value="成員B">成員B</option>
+                        <option value="成員C">成員C</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 block mb-1">金額 (JPY)</label>
+                    <input type="number" id="exp-amount" placeholder="輸入金額" class="w-full bg-gray-50 border-0 rounded-lg p-2 text-sm">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 block mb-1">項目名稱</label>
+                    <input type="text" id="exp-note" placeholder="例如：炸蝦飯、地鐵票" class="w-full bg-gray-50 border-0 rounded-lg p-2 text-sm">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 block mb-1">類別</label>
+                    <div class="flex gap-2">
+                        <label class="flex-1"><input type="radio" name="exp-cat" value="food" checked class="hidden peer"><div class="peer-checked:bg-[#e67e22] peer-checked:text-white bg-gray-100 text-gray-400 text-center py-1 rounded text-xs cursor-pointer">餐飲</div></label>
+                        <label class="flex-1"><input type="radio" name="exp-cat" value="trans" class="hidden peer"><div class="peer-checked:bg-[#3498db] peer-checked:text-white bg-gray-100 text-gray-400 text-center py-1 rounded text-xs cursor-pointer">交通</div></label>
+                        <label class="flex-1"><input type="radio" name="exp-cat" value="play" class="hidden peer"><div class="peer-checked:bg-[#27ae60] peer-checked:text-white bg-gray-100 text-gray-400 text-center py-1 rounded text-xs cursor-pointer">遊玩</div></label>
+                    </div>
+                </div>
+                <button onclick="saveExpense()" class="w-full bg-[#5e8b7e] text-white py-3 rounded-xl font-bold shadow-md hover:bg-[#4a7266] transition-colors">確認送出</button>
+                <button onclick="closeLedgerModal()" class="w-full text-gray-400 text-xs py-2">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Firebase 設定
+        const firebaseConfig = {
+          apiKey: "AIzaSyBvvQQ7uAomcA7f_QbU6r8imK5ZnA52SS4",
+          authDomain: "nagoya-9ad6e.firebaseapp.com",
+          projectId: "nagoya-9ad6e",
+          storageBucket: "nagoya-9ad6e.firebasestorage.app",
+          messagingSenderId: "731191881156",
+          appId: "1:731191881156:web:11092aa985c0ddf41a8891"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const tripRef = doc(db, "trips", "nagoya_2026_ledger"); // 另存到新文件，避免破壞原本清單
+
+        let ledgerData = [];
+        const members = ["成員A", "成員B", "成員C"]; // 可自行修改成員名單
+
+        // 監聽 Firebase 資料
+        onSnapshot(tripRef, (docSnap) => {
+            const statusEl = document.getElementById('sync-status');
+            if (docSnap.exists()) {
+                ledgerData = docSnap.data().ledger || [];
+                renderLedger();
+                statusEl.innerHTML = '<i class="fas fa-check-circle text-green-500"></i> 已同步';
+            } else {
+                setDoc(tripRef, { ledger: [] });
+                statusEl.innerHTML = '<i class="fas fa-info-circle text-blue-500"></i> 初始化帳本';
             }
-        ];
-
-        const guideData = [
-            {
-                title: "白川鄉合掌村",
-                img: "https://d1grca2t3zpuug.cloudfront.net/2024/09/66e26c5a140b9-870x500.webp",
-                desc: "世界文化遺產。特色的「合掌造」建築是為了應對豪雪地帶而生，屋頂呈現60度斜角，形狀像雙手合十，故名合掌村。這裡宛如童話世界，記得嘗試這裡的五平餅與飛驒牛串燒。",
-                location: "Shirakawa-go",
-                hasMap: true
-            },
-            {
-                title: "熱田神宮",
-                img: "https://static.gltjp.com/glt/data/article/21000/20401/20241119_023936_de5ef996_w1920.webp",
-                desc: "日本三大神宮之一，供奉著日本三大神器之一的「草薙劍」。神宮內古樹參天，有著名的「信長牆」。來到這裡必吃宮きしめん（宮寬麵）或附近的蓬萊軒鰻魚飯。",
-                location: "Atsuta Shrine",
-                hasMap: false
-            },
-            {
-                title: "犬山城",
-                img: "https://d1grca2t3zpuug.cloudfront.net/2025/12/2025inuyamajo16-870x500-1765244239.webp",
-                desc: "日本現存最古老的天守閣之一，是國寶五城之一。位於木推川旁的小山丘上，視野極佳。山下的三光稻荷神社有粉紅色的愛心繪馬，還有可以「洗錢」的神水，據說洗過的錢會倍增回來！",
-                location: "Inuyama Castle",
-                hasMap: false
-            },
-            {
-                title: "名古屋城",
-                img: "https://res.klook.com/images/w_1200,h_630,c_fill,q_65/activities/mv6lrp0mrcl0chali7mm/名古屋城.jpg",
-                desc: "德川家康下令建造的平地城堡，屋頂上的金鯱是名古屋的象徵。必看的是修復後的「本丸御殿」，內部金碧輝煌的障壁畫極為震撼，展現了江戶時代武家文化的奢華。",
-                location: "Nagoya Castle",
-                hasMap: true
-            }
-        ];
-
-        const defaultPackingList = [
-            "護照 (有效期6個月以上)", "eSIM / 漫遊開通", "日幣 (現金)", "Visit Japan Web截圖", 
-            "行動電源 & 充電線", "常備藥品 (胃藥/止痛)", "牙刷牙膏", "信用卡 (海外回饋高)", 
-            "保暖衣物", "舒適好走的鞋", "暖暖包", "口罩"
-        ];
-
-        // --- 邏輯區 ---
-        document.addEventListener('DOMContentLoaded', () => {
-            renderDateSelector();
-            renderItinerary(0);
-            renderGuide();
-            renderChecklist();
-            initMemo();
         });
 
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            document.getElementById('nav-' + tabId).classList.add('active');
-            window.scrollTo(0,0);
-        }
+        // 保存帳目
+        window.saveExpense = async function() {
+            const payer = document.getElementById('exp-payer').value;
+            const amount = parseFloat(document.getElementById('exp-amount').value);
+            const note = document.getElementById('exp-note').value;
+            const cat = document.querySelector('input[name="exp-cat"]:checked').value;
 
-        function renderDateSelector() {
-            const container = document.getElementById('date-scroll');
-            container.innerHTML = itineraryData.map((day, index) => `
-                <button onclick="renderItinerary(${index})" id="date-btn-${index}" 
-                    class="date-btn flex-shrink-0 px-4 py-2 rounded-2xl border border-gray-100 shadow-sm bg-white min-w-[70px] text-center transition-all ${index === 0 ? 'bg-[#5e8b7e] text-white ring-2 ring-[#5e8b7e]/50' : 'text-gray-500'}">
-                    <div class="text-xs font-bold mb-1">${day.date}</div>
-                    <div class="text-[10px] opacity-80">${day.day}</div>
-                </button>
-            `).join('');
-        }
+            if (!amount || !note) return alert("請填寫金額與項目！");
 
-        function renderItinerary(index) {
-            document.querySelectorAll('.date-btn').forEach(btn => {
-                btn.classList.remove('bg-[#5e8b7e]', 'text-white', 'ring-2');
-                btn.classList.add('text-gray-500', 'bg-white');
-            });
-            const activeBtn = document.getElementById(`date-btn-${index}`);
-            activeBtn.classList.remove('text-gray-500', 'bg-white');
-            activeBtn.classList.add('bg-[#5e8b7e]', 'text-white', 'ring-2', 'ring-[#5e8b7e]/50');
+            const newEntry = {
+                id: Date.now(),
+                payer, amount, note, cat,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
 
-            const dayData = itineraryData[index];
-            const container = document.getElementById('itinerary-container');
-            let html = `<div class="pl-8 mb-6"><div class="inline-block bg-[#e08e79]/10 text-[#e08e79] px-3 py-1 rounded-full text-xs font-bold border border-[#e08e79]/20"><i class="fas fa-bed mr-1"></i> ${dayData.hotel}</div></div>`;
+            ledgerData.unshift(newEntry); // 新的在前面
+            try {
+                await setDoc(tripRef, { ledger: ledgerData });
+                closeLedgerModal();
+                // 清空輸入
+                document.getElementById('exp-amount').value = '';
+                document.getElementById('exp-note').value = '';
+            } catch (e) {
+                alert("儲存失敗！");
+            }
+        };
 
-            html += dayData.events.map(event => {
-                const isImportant = event.important ? 'border-l-4 border-[#dca856] bg-[#fffcf5]' : 'border-l-4 border-transparent bg-white';
-                const timeColor = event.important ? 'text-[#dca856]' : 'text-[#769a9e]';
-                // 修正了地圖連結的語法
-                const mapBtn = event.location ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}" target="_blank" class="mt-2 inline-flex items-center text-xs text-white bg-[#5e8b7e] px-3 py-1.5 rounded-full hover:bg-[#4a7266] transition-colors shadow-sm"><i class="fas fa-map-marker-alt mr-1.5"></i> 導航</a>` : '';
-                return `<div class="relative pl-8 pb-1 group"><div class="absolute left-0 top-1 w-8 flex flex-col items-center z-10"><div class="w-3 h-3 rounded-full bg-white border-2 border-[#5e8b7e] group-hover:scale-125 transition-transform"></div></div><div class="watercolor-card p-4 mb-4 ${isImportant}"><div class="flex justify-between items-start mb-1"><span class="font-mono text-sm font-bold ${timeColor}">${event.time} - ${event.end}</span><i class="fas ${event.icon} text-gray-300 text-sm"></i></div><h3 class="text-lg font-bold text-gray-800 mb-1 leading-tight">${event.title}</h3>${event.desc ? `<p class="text-sm text-gray-500 mb-2 leading-relaxed">${event.desc}</p>` : ''}${mapBtn}</div></div>`;
-            }).join('');
-            container.innerHTML = html;
-        }
+        // 刪除帳目
+        window.deleteExpense = async function(id) {
+            if (!confirm("確定要刪除這筆帳目嗎？")) return;
+            ledgerData = ledgerData.filter(item => item.id !== id);
+            await setDoc(tripRef, { ledger: ledgerData });
+        };
 
-        function renderGuide() {
-            const container = document.getElementById('guide-container');
-            container.innerHTML = guideData.map((spot) => `
-                <div class="watercolor-card overflow-hidden bg-white">
-                    <div class="h-48 overflow-hidden relative"><img src="${spot.img}" alt="${spot.title}" class="w-full h-full object-cover"><div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/60 to-transparent p-4 pt-12"><h3 class="text-white text-xl font-bold tracking-widest">${spot.title}</h3></div></div>
-                    <div class="p-5"><p class="text-gray-600 text-sm leading-7 text-justify font-light"><span class="text-4xl float-left mr-2 mt-[-10px] handwriting text-[#e08e79]">${spot.desc.charAt(0)}</span>${spot.desc.slice(1)}</p></div>
-                </div>
-            `).join('');
-        }
+        // 渲染帳本
+        function renderLedger() {
+            const listContainer = document.getElementById('ledger-list');
+            const totalEl = document.getElementById('total-amount');
+            const avgEl = document.getElementById('avg-amount');
+            const settlementEl = document.getElementById('settlement-list');
 
-        function renderChecklist() {
-            const container = document.getElementById('checklist-container');
-            const savedState = JSON.parse(localStorage.getItem('trip_checklist_state')) || {};
-            
-            // 修正這裡：原本程式碼斷掉，這裡補上生成 Checklist 的 HTML 邏輯
-            container.innerHTML = defaultPackingList.map((item, index) => {
-                const isChecked = savedState[item] ? 'checked' : '';
+            if (ledgerData.length === 0) {
+                listContainer.innerHTML = '<div class="py-10 text-center text-gray-300 text-xs">尚無支出紀錄</div>';
+                return;
+            }
+
+            let total = 0;
+            let paidByMember = {};
+            members.forEach(m => paidByMember[m] = 0);
+
+            // 渲染清單
+            listContainer.innerHTML = ledgerData.map(item => {
+                total += item.amount;
+                paidByMember[item.payer] += item.amount;
+                const catNames = {food:'餐飲', trans:'交通', play:'遊玩'};
                 return `
-                <div class="flex items-center gap-3 p-2 border-b border-gray-50 last:border-0 hover:bg-gray-50 rounded-lg transition-colors">
-                    <input type="checkbox" id="check-${index}" class="custom-checkbox hidden" ${isChecked} onchange="toggleCheck('${item}')">
-                    <label for="check-${index}" class="text-sm text-gray-700 flex-1 cursor-pointer select-none">${item}</label>
+                <div class="expense-item p-4 flex justify-between items-center bg-white hover:bg-gray-50">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="category-tag cat-${item.cat}">${catNames[item.cat]}</span>
+                            <span class="font-bold text-sm text-gray-700">${item.note}</span>
+                        </div>
+                        <div class="text-[10px] text-gray-400">${item.payer} 付款 · ${item.time}</div>
+                    </div>
+                    <div class="text-right flex items-center gap-3">
+                        <div class="font-mono font-bold text-[#5e8b7e]">¥${item.amount.toLocaleString()}</div>
+                        <button onclick="deleteExpense(${item.id})" class="text-gray-200 hover:text-red-300 transition-colors">
+                            <i class="fas fa-trash-alt text-xs"></i>
+                        </button>
+                    </div>
+                </div>`;
+            }).join('');
+
+            // 更新統計卡片
+            const avg = total / members.length;
+            totalEl.innerText = total.toLocaleString();
+            avgEl.innerText = Math.round(avg).toLocaleString();
+
+            // 渲染結算分析
+            settlementEl.innerHTML = members.map(m => {
+                const diff = paidByMember[m] - avg;
+                const colorClass = diff >= 0 ? 'text-green-600' : 'text-red-500';
+                const statusText = diff >= 0 ? '應收' : '應付';
+                return `
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-gray-600 font-medium">${m}</span>
+                    <div class="flex gap-4">
+                        <span class="text-gray-400 text-xs">已付 ¥${paidByMember[m].toLocaleString()}</span>
+                        <span class="${colorClass} font-mono font-bold">${statusText} ¥${Math.abs(Math.round(diff)).toLocaleString()}</span>
+                    </div>
                 </div>`;
             }).join('');
         }
 
-        function toggleCheck(item) {
-            const savedState = JSON.parse(localStorage.getItem('trip_checklist_state')) || {};
-            if (savedState[item]) {
-                delete savedState[item];
-            } else {
-                savedState[item] = true;
-            }
-            localStorage.setItem('trip_checklist_state', JSON.stringify(savedState));
-            renderChecklist();
-        }
+        // 基本導覽邏輯
+        window.switchTab = function(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.getElementById('nav-' + tabId).classList.add('active');
+        };
 
-        function initMemo() {
-            const memoArea = document.getElementById('user-memo');
-            if (memoArea) {
-                // 讀取存檔
-                memoArea.value = localStorage.getItem('trip_memo') || '';
-                
-                // 綁定輸入事件，自動存檔
-                memoArea.addEventListener('input', function() {
-                    localStorage.setItem('trip_memo', this.value);
-                });
-            }
-        }
+        window.openLedgerModal = () => document.getElementById('ledger-modal').classList.add('open');
+        window.closeLedgerModal = () => document.getElementById('ledger-modal').classList.remove('open');
     </script>
 </body>
 </html>
