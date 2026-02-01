@@ -129,30 +129,6 @@
         .tag-go { background-color: var(--tag-go); }
         .tag-code { background-color: var(--tag-code); font-family: monospace; letter-spacing: 1px;}
 
-        /* 自定義多人 Checklist 樣式 */
-        .family-check-grid {
-            display: grid;
-            grid-template-columns: 2fr repeat(5, 1fr);
-            gap: 4px;
-            align-items: center;
-        }
-        .family-check-header {
-            font-size: 0.7rem;
-            text-align: center;
-            color: #769a9e;
-            font-weight: bold;
-        }
-        .check-input {
-            width: 18px;
-            height: 18px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-            accent-color: #e6a496;
-            margin: 0 auto;
-            display: block;
-            cursor: pointer;
-        }
-
         /* 匯率計算機樣式 */
         .calc-input {
             width: 100%;
@@ -169,6 +145,27 @@
             outline: none;
             border-color: #769a9e;
             background: #fff;
+        }
+
+        /* VJW 圖片樣式 */
+        .vjw-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .vjw-item {
+            background: #f8f8f8;
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+            border: 2px dashed #e0e0e0;
+        }
+        .vjw-img {
+            width: 100%;
+            aspect-ratio: 1/1;
+            object-fit: contain;
+            background: white;
+            margin-bottom: 5px;
         }
     </style>
 </head>
@@ -204,26 +201,35 @@
     
     <section id="lists" class="tab-content px-4 pt-4">
         <div class="mb-20">
-            <h2 class="text-xl handwriting mb-3 text-[#e6a496]"><i class="fas fa-clipboard-check mr-2"></i>Family Checklist</h2>
-            <div class="bg-white p-4 rounded-[20px] shadow-sm relative overflow-hidden">
+            <h2 class="text-xl handwriting mb-3 text-[#e6a496]"><i class="fas fa-suitcase-rolling mr-2"></i>Packing List</h2>
+            <div class="bg-white p-6 rounded-[20px] shadow-sm relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-full h-1 bg-[#e6a496]"></div>
+                <p class="text-xs text-gray-400 mb-4 text-center">出發前請再次確認以下物品</p>
                 
-                <div class="family-check-grid mb-3 border-b border-gray-100 pb-2">
-                    <div class="text-xs font-bold text-gray-400 pl-1">物品項目</div>
-                    <div class="family-check-header">爸</div>
-                    <div class="family-check-header">媽</div>
-                    <div class="family-check-header">妹</div>
-                    <div class="family-check-header">哥</div>
-                    <div class="family-check-header">我</div>
-                </div>
-
-                <div id="checklist-container" class="space-y-1"></div>
+                <ul class="space-y-3" id="checklist-container">
+                    </ul>
             </div>
         </div>
     </section>
 
     <section id="info" class="tab-content px-4 pt-4 space-y-6">
         
+        <div>
+            <h3 class="text-lg font-bold text-[#e6a496] mb-2"><i class="fas fa-qrcode mr-2"></i>VJW 通關碼</h3>
+            <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-center justify-between" onclick="openVJWModal()">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-yellow-50 rounded-full flex items-center justify-center text-yellow-500">
+                        <i class="fas fa-passport text-xl"></i>
+                    </div>
+                    <div>
+                        <div class="font-bold text-gray-700">Visit Japan Web</div>
+                        <div class="text-xs text-gray-500">點擊開啟 5 人 QR Code</div>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right text-gray-300"></i>
+            </div>
+        </div>
+
         <div>
             <h3 class="text-lg font-bold text-[#dca856] mb-2"><i class="fas fa-calculator mr-2"></i>匯率小幫手</h3>
             <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
@@ -332,18 +338,7 @@
                 </div>
             </div>
         </div>
-        <div class="grid grid-cols-2 gap-4">
-            <a href="https://www.jma.go.jp/bosai/forecast/" target="_blank" class="watercolor-card p-4 flex flex-col items-center justify-center gap-2 text-center text-[#5e8b7e]">
-                <i class="fas fa-cloud-sun text-3xl"></i>
-                <span class="font-bold">天氣預報</span>
-                <span class="text-xs text-gray-400">日本氣象廳</span>
-            </a>
-            <a href="https://vjw-lp.digital.go.jp/en/" target="_blank" class="watercolor-card p-4 flex flex-col items-center justify-center gap-2 text-center text-[#e6a496]">
-                <i class="fas fa-qrcode text-3xl"></i>
-                <span class="font-bold">VJW 入境</span>
-                <span class="text-xs text-gray-400">通關必備</span>
-            </a>
-        </div>
+        
         <div class="bg-red-50 rounded-xl p-4 border border-red-100 mb-20">
             <h3 class="text-red-800 font-bold mb-2"><i class="fas fa-exclamation-circle mr-2"></i>緊急聯絡</h3>
             <ul class="text-sm text-red-700 space-y-1">
@@ -368,7 +363,7 @@
             <span class="text-[10px]">導覽</span>
         </button>
         <button onclick="switchTab('lists')" class="nav-item flex flex-col items-center gap-1 text-gray-400 transition-colors flex-1" id="nav-lists">
-            <i class="fas fa-list-check text-lg"></i>
+            <i class="fas fa-suitcase text-lg"></i>
             <span class="text-[10px]">清單</span>
         </button>
         <button onclick="switchTab('info')" class="nav-item flex flex-col items-center gap-1 text-gray-400 transition-colors flex-1" id="nav-info">
@@ -403,8 +398,45 @@
             </div>
         </div>
     </div>
+    
+    <div id="vjw-modal" class="modal-overlay" onclick="closeVJWModal(event)">
+        <div class="modal-content p-6" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-[#e6a496]">VJW 入境 QR Code</h3>
+                <button onclick="closeVJWModal()" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="text-xs text-gray-400 mb-4 text-center">請於入境審查時出示此畫面</div>
+            
+            <div class="vjw-grid" id="vjw-grid-container">
+                </div>
+        </div>
+    </div>
 
     <script>
+        // ==========================================
+        // VJW 圖片設定區 (請在此處貼上您的圖片網址)
+        // ==========================================
+        const vjwImages = [
+            { name: "爸", url: "https://via.placeholder.com/300?text=QR+Dad" },
+            { name: "媽", url: "https://via.placeholder.com/300?text=QR+Mom" },
+            { name: "哥", url: "https://via.placeholder.com/300?text=QR+Bro" },
+            { name: "妹", url: "https://via.placeholder.com/300?text=QR+Sis" },
+            { name: "我", url: "https://via.placeholder.com/300?text=QR+Me" }
+        ];
+
+        // ==========================================
+        // 2/9 - 2/13 天氣預報設定 (靜態顯示)
+        // ==========================================
+        const staticWeatherData = {
+            "2/9":  { min: 3, max: 10, icon: "fa-cloud-sun", condition: "晴時多雲" },
+            "2/10": { min: 2, max: 9,  icon: "fa-cloud", condition: "多雲" },
+            "2/11": { min: -3, max: 2, icon: "fa-snowflake", condition: "下雪" }, // 白川鄉特別冷
+            "2/12": { min: 1, max: 11, icon: "fa-sun", condition: "晴朗" },
+            "2/13": { min: 2, max: 12, icon: "fa-sun", condition: "晴朗" }
+        };
+
         const locationCoords = {
             "Nagoya": { lat: 35.1815, lon: 136.9066 },
             "Tokoname": { lat: 34.8893, lon: 136.8346 },
@@ -666,8 +698,6 @@
             "保暖衣物", "舒適好走的鞋", "暖暖包", "口罩", "購物袋 (環保袋)"
         ];
         
-        const familyMembers = ["爸", "媽", "妹", "哥", "我"];
-
         // --- 邏輯區 ---
         document.addEventListener('DOMContentLoaded', () => {
             renderDateSelector();
@@ -695,52 +725,8 @@
             `).join('');
         }
 
-        async function fetchWeather(lat, lon, dateStr) {
-            const container = document.getElementById('weather-card-container');
-            container.innerHTML = `
-                <div class="watercolor-card p-4 bg-gradient-to-br from-[#fdfbf7] to-[#fff] border-l-4 border-[#769a9e] mb-4 mx-2 animate-pulse">
-                    <div class="flex items-center gap-4">
-                        <div class="text-center w-16 shrink-0 text-gray-300">
-                            <i class="fas fa-circle-notch fa-spin text-2xl"></i>
-                        </div>
-                        <div class="flex-1 pl-4">
-                            <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                            <div class="h-3 bg-gray-100 rounded w-1/2"></div>
-                        </div>
-                    </div>
-                </div>`;
-
-            const year = "2026";
-            const [month, day] = dateStr.split('/');
-            const formattedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-            
-            try {
-                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=Asia%2FTokyo&start_date=${formattedDate}&end_date=${formattedDate}`;
-                
-                const response = await fetch(url);
-                const data = await response.json();
-
-                if (data.daily && data.daily.time.length > 0) {
-                    const min = Math.round(data.daily.temperature_2m_min[0]);
-                    const max = Math.round(data.daily.temperature_2m_max[0]);
-                    const code = data.daily.weathercode[0];
-                    let icon = "fa-sun";
-                    let condition = "晴朗";
-                    
-                    if (code > 3) { icon = "fa-cloud"; condition = "多雲"; }
-                    if (code > 45) { icon = "fa-smog"; condition = "霧"; }
-                    if (code > 50) { icon = "fa-cloud-rain"; condition = "有雨"; }
-                    if (code > 70) { icon = "fa-snowflake"; condition = "有雪"; }
-
-                    return { min, max, icon, condition, isForecast: true };
-                }
-            } catch (e) {
-                console.error("Weather fetch failed", e);
-            }
-            return { min: 2, max: 9, icon: "fa-cloud-sun", condition: "平均氣候", isForecast: false };
-        }
-
-        async function renderItinerary(index) {
+        // 修改後的 renderItinerary：直接讀取靜態天氣數據
+        function renderItinerary(index) {
             document.querySelectorAll('.date-btn').forEach(btn => {
                 btn.classList.remove('bg-[#5e8b7e]', 'text-white', 'ring-2');
                 btn.classList.add('text-gray-500', 'bg-white');
@@ -750,14 +736,12 @@
             activeBtn.classList.add('bg-[#5e8b7e]', 'text-white', 'ring-2', 'ring-[#5e8b7e]/50');
 
             const dayData = itineraryData[index];
-            
             const locKey = dayData.locationKey || "Nagoya";
-            const coords = locationCoords[locKey];
             
-            const weather = await fetchWeather(coords.lat, coords.lon, dayData.date);
+            // 直接讀取靜態天氣
+            const weather = staticWeatherData[dayData.date] || { min: 5, max: 12, icon: "fa-cloud-sun", condition: "多雲時晴" };
 
             const weatherContainer = document.getElementById('weather-card-container');
-            const weatherBadge = weather.isForecast ? '<span class="bg-blue-100 text-blue-600 text-[10px] px-1 rounded ml-1">預報</span>' : '<span class="bg-gray-100 text-gray-500 text-[10px] px-1 rounded ml-1">歷史平均</span>';
             
             const weatherHtml = `
                 <div class="watercolor-card p-4 bg-gradient-to-br from-[#fdfbf7] to-[#fff] border-l-4 border-[#769a9e] mb-4 mx-2">
@@ -770,7 +754,6 @@
                             <div class="flex items-center mb-1">
                                 <span class="text-xs text-gray-500 tracking-wider font-bold mr-1">${locKey === 'Shirakawa' ? '白川鄉' : (locKey === 'Takayama' ? '高山' : (locKey === 'Tokoname' ? '常滑' : '名古屋'))}</span>
                                 <span class="text-xs text-gray-400">${weather.condition}</span>
-                                ${weatherBadge}
                             </div>
                             <div class="text-sm text-gray-600 font-medium leading-relaxed">
                                 <i class="fas fa-tshirt text-[#e6a496] mr-1"></i>
@@ -845,6 +828,25 @@
             document.getElementById('event-modal').classList.remove('open');
             document.body.style.overflow = '';
         }
+        
+        // VJW Modal 相關功能
+        function openVJWModal() {
+            const container = document.getElementById('vjw-grid-container');
+            container.innerHTML = vjwImages.map(person => `
+                <div class="vjw-item">
+                    <img src="${person.url}" class="vjw-img" alt="${person.name} QR">
+                    <div class="font-bold text-gray-700">${person.name}</div>
+                </div>
+            `).join('');
+            
+            document.getElementById('vjw-modal').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeVJWModal() {
+            document.getElementById('vjw-modal').classList.remove('open');
+            document.body.style.overflow = '';
+        }
 
         function renderGuide() {
             const container = document.getElementById('guide-container');
@@ -878,43 +880,15 @@
             }).join('');
         }
         
-        // Checklist 渲染函式
+        // 修改後的 Checklist (純文字清單)
         function renderChecklist() {
             const container = document.getElementById('checklist-container');
-            const savedState = JSON.parse(localStorage.getItem('family_checklist_state')) || {};
-            
-            container.innerHTML = defaultPackingList.map((item, index) => {
-                let checkboxes = '';
-                familyMembers.forEach((member, mIndex) => {
-                    const key = `${item}_${mIndex}`;
-                    const isChecked = savedState[key] ? 'checked' : '';
-                    checkboxes += `
-                        <input type="checkbox" id="check-${index}-${mIndex}" 
-                            class="check-input" ${isChecked} 
-                            onchange="toggleFamilyCheck('${item}', ${mIndex})">
-                    `;
-                });
-
-                return `
-                <div class="family-check-grid py-2 border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
-                    <div class="text-sm text-gray-700 pl-1 font-medium">${item}</div>
-                    ${checkboxes}
-                </div>`;
-            }).join('');
-        }
-
-        function toggleFamilyCheck(item, memberIndex) {
-            const savedState = JSON.parse(localStorage.getItem('family_checklist_state')) || {};
-            const key = `${item}_${memberIndex}`;
-            
-            if (savedState[key]) {
-                delete savedState[key];
-            } else {
-                savedState[key] = true;
-            }
-            
-            localStorage.setItem('family_checklist_state', JSON.stringify(savedState));
-            renderChecklist();
+            container.innerHTML = defaultPackingList.map(item => `
+                <li class="flex items-center gap-3 text-gray-700">
+                    <i class="fas fa-check-circle text-[#769a9e]/30"></i>
+                    <span>${item}</span>
+                </li>
+            `).join('');
         }
 
         // 匯率計算功能
@@ -924,7 +898,7 @@
             const twdInput = document.getElementById('input-twd');
             
             let rate = parseFloat(rateInput.value);
-            if (isNaN(rate) || rate <= 0) rate = 0.215; // 預設防呆
+            if (isNaN(rate) || rate <= 0) rate = 0.215;
 
             if (source === 'jpy') {
                 const jpy = parseFloat(jpyInput.value);
@@ -941,7 +915,6 @@
                     jpyInput.value = '';
                 }
             } else if (source === 'rate') {
-                // 更新匯率時，如果有輸入日幣則更新台幣
                 if (jpyInput.value) {
                     calculateRate('jpy');
                 }
