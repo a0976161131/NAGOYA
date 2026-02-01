@@ -893,3 +893,144 @@
                             <span class="font-mono text-sm font-bold ${timeColor}">${event.time} - ${event.end}</span>
                             <i class="fas ${event.icon} text-gray-300 text-sm"></i>
                         </div>
+                        <h3 class="text-lg font-bold text-gray-800 mb-1 leading-tight">${event.title}</h3>
+                        ${event.desc ? `<p class="text-sm text-gray-500 mb-2 leading-relaxed line-clamp-2">${event.desc}</p>` : ''}
+                        
+                        <div class="flex justify-end mt-2">
+                             <span class="text-xs text-[#769a9e] bg-[#769a9e]/10 px-2 py-1 rounded-full"><i class="fas fa-search-plus mr-1"></i>攻略</span>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+            container.innerHTML = html;
+        }
+
+        function openEventModal(dayIndex, eventIndex) {
+            const event = itineraryData[dayIndex].events[eventIndex];
+            
+            document.getElementById('modal-title').innerText = event.title;
+            document.getElementById('modal-time').innerText = `${event.time} - ${event.end}`;
+            document.getElementById('modal-desc').innerText = event.guide || "暫無特別攻略，請享受旅程！";
+            
+            const tagsContainer = document.getElementById('modal-tags');
+            tagsContainer.innerHTML = '';
+            if (event.tags) {
+                event.tags.forEach(tag => {
+                    const span = document.createElement('span');
+                    span.className = `guide-tag tag-${tag.type}`;
+                    span.innerText = tag.text;
+                    tagsContainer.appendChild(span);
+                });
+            }
+
+            const mapBtn = document.getElementById('modal-map-btn');
+            if (event.location) {
+                mapBtn.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`;
+                mapBtn.style.display = 'flex';
+            } else {
+                mapBtn.style.display = 'none';
+            }
+
+            document.getElementById('event-modal').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('event-modal').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        
+        // VJW Modal 相關功能
+        function openVJWModal() {
+            const container = document.getElementById('vjw-grid-container');
+            container.innerHTML = vjwImages.map(person => `
+                <div class="vjw-item">
+                    <img src="${person.url}" class="vjw-img" alt="${person.name} QR">
+                    <div class="font-bold text-gray-700">${person.name}</div>
+                </div>
+            `).join('');
+            
+            document.getElementById('vjw-modal').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeVJWModal() {
+            document.getElementById('vjw-modal').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        function renderGuide() {
+            const container = document.getElementById('guide-container');
+            container.innerHTML = guideData.map(group => {
+                const itemsHtml = group.items.map(spot => `
+                    <div class="watercolor-card overflow-hidden bg-white mb-6">
+                        <div class="h-40 overflow-hidden relative">
+                            <img src="${spot.img}" alt="${spot.title}" class="w-full h-full object-cover">
+                            <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/60 to-transparent p-3 pt-8">
+                                <h3 class="text-white text-lg font-bold tracking-widest">${spot.title}</h3>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-gray-600 text-sm leading-6 text-justify font-light">
+                                <span class="text-3xl float-left mr-2 mt-[-5px] handwriting text-[#e08e79]">${spot.desc.charAt(0)}</span>${spot.desc.slice(1)}
+                            </p>
+                        </div>
+                    </div>
+                `).join('');
+
+                return `
+                    <div class="mb-8">
+                        <h3 class="text-xl handwriting mb-4 ${group.color} border-b border-gray-200 pb-2">
+                            <i class="fas fa-map-pin mr-2 text-sm"></i>${group.category}
+                        </h3>
+                        <div class="space-y-4">
+                            ${itemsHtml}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // 修改後的 Checklist (純文字清單)
+        function renderChecklist() {
+            const container = document.getElementById('checklist-container');
+            container.innerHTML = defaultPackingList.map(item => `
+                <li class="flex items-center gap-3 text-gray-700">
+                    <i class="fas fa-check-circle text-[#769a9e]/30"></i>
+                    <span>${item}</span>
+                </li>
+            `).join('');
+        }
+
+        // 匯率計算功能
+        function calculateRate(source) {
+            const rateInput = document.getElementById('exchange-rate');
+            const jpyInput = document.getElementById('input-jpy');
+            const twdInput = document.getElementById('input-twd');
+            
+            let rate = parseFloat(rateInput.value);
+            if (isNaN(rate) || rate <= 0) rate = 0.215;
+
+            if (source === 'jpy') {
+                const jpy = parseFloat(jpyInput.value);
+                if (!isNaN(jpy)) {
+                    twdInput.value = Math.round(jpy * rate);
+                } else {
+                    twdInput.value = '';
+                }
+            } else if (source === 'twd') {
+                const twd = parseFloat(twdInput.value);
+                if (!isNaN(twd)) {
+                    jpyInput.value = Math.round(twd / rate);
+                } else {
+                    jpyInput.value = '';
+                }
+            } else if (source === 'rate') {
+                if (jpyInput.value) {
+                    calculateRate('jpy');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
