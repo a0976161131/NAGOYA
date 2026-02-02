@@ -3,6 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#769a9e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/201/201623.png">
+    
     <title>名古屋・冬之旅</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -33,6 +39,7 @@
             font-family: "Microsoft JhengHei", "PingFang TC", "Heiti TC", "Noto Sans TC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg-paper);
             color: var(--text-main);
+            /* 優化：將 SVG 背景轉為 Base64 以便離線快取 */
             background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
             -webkit-font-smoothing: antialiased;
             font-weight: 500;
@@ -168,9 +175,19 @@
             margin-bottom: 5px;
             min-height: 100px; 
         }
+        /* 離線提示 */
+        #offline-indicator {
+            display: none;
+            background: #e74c3c;
+            color: white;
+            text-align: center;
+            font-size: 0.75rem;
+            padding: 4px;
+        }
     </style>
 </head>
 <body class="pb-24">
+    <div id="offline-indicator">⚠️ 目前處於離線模式，部分功能受限</div>
 
     <header class="sticky top-0 z-50 bg-[#f9f7f2]/95 backdrop-blur-md px-4 py-3 shadow-sm border-b border-gray-200/50">
         <div class="flex justify-between items-center">
@@ -425,6 +442,29 @@
     </div>
 
     <script>
+        // ==========================================
+        // PWA & Service Worker 註冊
+        // ==========================================
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('SW Registered!', reg))
+                    .catch(err => console.log('SW Error:', err));
+            });
+        }
+        
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+        
+        function updateOnlineStatus() {
+            const indicator = document.getElementById('offline-indicator');
+            if (!navigator.onLine) {
+                indicator.style.display = 'block';
+            } else {
+                indicator.style.display = 'none';
+            }
+        }
+
         // ==========================================
         // VJW 圖片設定區 
         // ==========================================
@@ -714,6 +754,7 @@
             renderGuide();
             renderChecklist();
             // 啟動五日預報 API
+            updateOnlineStatus(); // 檢查連線狀態
             fetchWeeklyForecast();
         });
 
@@ -752,6 +793,12 @@
         // 1. 獲取單日天氣 (行程頁用)
         async function fetchWeather(lat, lon, dateString, elementId, fallbackData) {
             const container = document.getElementById(elementId);
+            
+            // 離線檢查：直接使用備份資料
+            if (!navigator.onLine) {
+                 renderWeatherCard(container, fallbackData, false);
+                 return;
+            }
             
             // 設定年份 (行程是 2026)
             const year = "2026"; 
@@ -816,27 +863,43 @@
             const endDate = "2026-02-13";
             const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=Asia%2FTokyo&start_date=${startDate}&end_date=${endDate}`;
 
+            // 輔助函數：渲染靜態資料
+            const renderStatic = () => {
+                const dates = ["2/9", "2/10", "2/11", "2/12", "2/13"];
+                const html = dates.map(d => {
+                    const info = staticWeatherData[d];
+                    return `
+                    <div class="flex-shrink-0 w-20 bg-white border border-gray-100 rounded-xl p-2 text-center shadow-sm flex flex-col justify-between opacity-70">
+                        <div class="text-[10px] text-gray-400 font-bold mb-1">${d} (預設)</div>
+                        <div class="text-[#769a9e] mb-1"><i class="fas ${info.icon} text-xl"></i></div>
+                        <div class="text-xs font-bold text-gray-600">${info.min}°-${info.max}°</div>
+                        <div class="text-[10px] text-gray-400 scale-90">${info.condition}</div>
+                    </div>`;
+                }).join('');
+                container.innerHTML = html;
+            };
+
+            // 離線處理
+            if (!navigator.onLine) {
+                renderStatic();
+                return;
+            }
+
             try {
                 const targetDate = new Date(startDate);
                 const today = new Date();
                 const diffTime = targetDate - today;
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                let dailyData = [];
-
                 // 如果日期太遠，使用靜態備份資料模擬
                 if (diffDays > 14 || diffDays < 0) {
-                    const dates = ["2/9", "2/10", "2/11", "2/12", "2/13"];
-                    dailyData = dates.map(d => ({
-                        date: d,
-                        ...staticWeatherData[d]
-                    }));
+                    renderStatic();
                 } else {
                     const response = await fetch(url);
                     const data = await response.json();
                     
                     if (data.daily && data.daily.time) {
-                        dailyData = data.daily.time.map((t, i) => {
+                        const dailyData = data.daily.time.map((t, i) => {
                             const dateObj = new Date(t);
                             const month = dateObj.getMonth() + 1;
                             const day = dateObj.getDate();
@@ -849,21 +912,21 @@
                                 condition: info.text
                             };
                         });
+                        
+                        container.innerHTML = dailyData.map(day => `
+                            <div class="flex-shrink-0 w-20 bg-white border border-gray-100 rounded-xl p-2 text-center shadow-sm flex flex-col justify-between">
+                                <div class="text-[10px] text-gray-400 font-bold mb-1">${day.date}</div>
+                                <div class="text-[#769a9e] mb-1"><i class="fas ${day.icon} text-xl"></i></div>
+                                <div class="text-xs font-bold text-gray-600">${day.min}°-${day.max}°</div>
+                                <div class="text-[10px] text-gray-400 scale-90">${day.condition}</div>
+                            </div>
+                        `).join('');
                     }
                 }
-
-                container.innerHTML = dailyData.map(day => `
-                    <div class="flex-shrink-0 w-20 bg-white border border-gray-100 rounded-xl p-2 text-center shadow-sm flex flex-col justify-between">
-                        <div class="text-[10px] text-gray-400 font-bold mb-1">${day.date}</div>
-                        <div class="text-[#769a9e] mb-1"><i class="fas ${day.icon} text-xl"></i></div>
-                        <div class="text-xs font-bold text-gray-600">${day.min}°-${day.max}°</div>
-                        <div class="text-[10px] text-gray-400 scale-90">${day.condition}</div>
-                    </div>
-                `).join('');
-
             } catch (e) {
                 console.error("Weekly forecast error", e);
-                container.innerHTML = `<div class="text-xs text-gray-400 w-full text-center">暫無法取得預報</div>`;
+                // 發生錯誤也渲染靜態
+                renderStatic();
             }
         }
 
