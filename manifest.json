@@ -1,0 +1,20 @@
+{
+  "name": "名古屋冬之旅",
+  "short_name": "名古屋之旅",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f9f7f2",
+  "theme_color": "#769a9e",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/201/201623.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/201/201623.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
